@@ -1,0 +1,123 @@
+{
+  "schemaVersion": 1,
+  "repository": "scherzo-systems/scherzo-cloud-cli",
+  "releaseUrl": "https://github.com/scherzo-systems/scherzo-cloud-cli/releases/tag/v0.15.0",
+  "tag": "v0.15.0",
+  "releaseId": 373161961,
+  "releaseCommit": "a4ff9e99b8fe6c78f1944acf376b65d62842b9ed",
+  "sourceRevision": "0e849fc9dbd366d57d612923ac3f877a70e70c81",
+  "requiredSourceAncestor": "d3abe478b006861330b8998cb8ccfefe28cf7958",
+  "version": "0.15.0",
+  "buildIdentity": "0e849fc9dbd366d57d612923ac3f877a70e70c81",
+  "checksumAsset": {
+    "id": 521014949,
+    "name": "SHA256SUMS",
+    "size": 354,
+    "sha256": "94c4b4adb92f4e2f7ea2eb70c88977fbd68ffe37dbaa2de0532f669b22b21cc7",
+    "url": "https://github.com/scherzo-systems/scherzo-cloud-cli/releases/download/v0.15.0/SHA256SUMS"
+  },
+  "archives": {
+    "x86_64-unknown-linux-gnu": {
+      "id": 521014950,
+      "name": "scherzo-cloud-0.15.0-x86_64-unknown-linux-gnu.tar.gz",
+      "size": 9718875,
+      "sha256": "177ce59310314dd1bcbd8f2f31d368d56c59ec7e39fa391de1a2a68c5a41e8c5",
+      "url": "https://github.com/scherzo-systems/scherzo-cloud-cli/releases/download/v0.15.0/scherzo-cloud-0.15.0-x86_64-unknown-linux-gnu.tar.gz",
+      "rootDirectory": "scherzo-cloud-0.15.0-x86_64-unknown-linux-gnu",
+      "inventory": [
+        {
+          "path": "scherzo-cloud-0.15.0-x86_64-unknown-linux-gnu",
+          "type": "directory",
+          "mode": 493,
+          "size": 0
+        },
+        {
+          "path": "scherzo-cloud-0.15.0-x86_64-unknown-linux-gnu/LICENSE",
+          "type": "file",
+          "mode": 420,
+          "size": 11357
+        },
+        {
+          "path": "scherzo-cloud-0.15.0-x86_64-unknown-linux-gnu/README.md",
+          "type": "file",
+          "mode": 420,
+          "size": 36699
+        },
+        {
+          "path": "scherzo-cloud-0.15.0-x86_64-unknown-linux-gnu/scherzo-cloud",
+          "type": "file",
+          "mode": 493,
+          "size": 31700880
+        }
+      ]
+    },
+    "aarch64-unknown-linux-gnu": {
+      "id": 521014951,
+      "name": "scherzo-cloud-0.15.0-aarch64-unknown-linux-gnu.tar.gz",
+      "size": 9883205,
+      "sha256": "4e705738fd768f64ad9eb0d1b564e5527bcf6474b2804c24a8dec5148bf8ec80",
+      "url": "https://github.com/scherzo-systems/scherzo-cloud-cli/releases/download/v0.15.0/scherzo-cloud-0.15.0-aarch64-unknown-linux-gnu.tar.gz",
+      "rootDirectory": "scherzo-cloud-0.15.0-aarch64-unknown-linux-gnu",
+      "inventory": [
+        {
+          "path": "scherzo-cloud-0.15.0-aarch64-unknown-linux-gnu",
+          "type": "directory",
+          "mode": 493,
+          "size": 0
+        },
+        {
+          "path": "scherzo-cloud-0.15.0-aarch64-unknown-linux-gnu/LICENSE",
+          "type": "file",
+          "mode": 420,
+          "size": 11357
+        },
+        {
+          "path": "scherzo-cloud-0.15.0-aarch64-unknown-linux-gnu/README.md",
+          "type": "file",
+          "mode": 420,
+          "size": 36699
+        },
+        {
+          "path": "scherzo-cloud-0.15.0-aarch64-unknown-linux-gnu/scherzo-cloud",
+          "type": "file",
+          "mode": 493,
+          "size": 30277688
+        }
+      ]
+    },
+    "aarch64-apple-darwin": {
+      "id": 521014952,
+      "name": "scherzo-cloud-0.15.0-aarch64-apple-darwin.tar.gz",
+      "size": 8900809,
+      "sha256": "6c7baec2865faf05fe6f7b2b4ad74a129f422311100eb1b2bfcb73c928a87b04",
+      "url": "https://github.com/scherzo-systems/scherzo-cloud-cli/releases/download/v0.15.0/scherzo-cloud-0.15.0-aarch64-apple-darwin.tar.gz",
+      "rootDirectory": "scherzo-cloud-0.15.0-aarch64-apple-darwin",
+      "inventory": [
+        {
+          "path": "scherzo-cloud-0.15.0-aarch64-apple-darwin",
+          "type": "directory",
+          "mode": 493,
+          "size": 0
+        },
+        {
+          "path": "scherzo-cloud-0.15.0-aarch64-apple-darwin/LICENSE",
+          "type": "file",
+          "mode": 420,
+          "size": 11357
+        },
+        {
+          "path": "scherzo-cloud-0.15.0-aarch64-apple-darwin/README.md",
+          "type": "file",
+          "mode": 420,
+          "size": 36699
+        },
+        {
+          "path": "scherzo-cloud-0.15.0-aarch64-apple-darwin/scherzo-cloud",
+          "type": "file",
+          "mode": 493,
+          "size": 26800576
+        }
+      ]
+    }
+  }
+}

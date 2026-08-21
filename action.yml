@@ -1,0 +1,50 @@
+name: Scherzo Run
+description: Run exactly one local Scherzo Workflow V1 invocation.
+inputs:
+  workflow:
+    description: Workflow file path.
+    required: true
+  source-root:
+    description: Complete Workflow V1 source boundary.
+    required: false
+    default: ${{ github.workspace }}
+  execution-root:
+    description: Existing caller-owned execution directory.
+    required: false
+    default: ${{ github.workspace }}
+  prompt:
+    description: Inline UTF-8 imports.prompt value.
+    required: false
+  prompt-file:
+    description: File containing exact imports.prompt bytes.
+    required: false
+  attachments:
+    description: Ordered media-type and path pairs, one per line.
+    required: false
+  max-parallel:
+    description: Maximum parallel workflow nodes.
+    required: false
+    default: "1"
+  export:
+    description: Named workflow export to bridge after validation.
+    required: false
+outputs:
+  outcome:
+    description: Committed workflow outcome, when available.
+  run-directory:
+    description: Trustworthy durable local run path, when available.
+  artifact-set-path:
+    description: Complete local Portable Artifact Set path, when committed.
+  result-path:
+    description: Committed result.json path, when available.
+  export-state:
+    description: Availability state of the selected export.
+  export-kind:
+    description: Kind of the selected available export.
+  export-path:
+    description: Carrier path of the selected available export, when present.
+  export-value:
+    description: Eligible inline text or JSON carrier bytes.
+runs:
+  using: node24
+  main: dist/index.cjs

@@ -1,0 +1,39 @@
+{
+  "name": "@scherzo-systems/run-action",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Run one local Scherzo Workflow V1 invocation from GitHub Actions.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "packageManager": "npm@11.13.0",
+  "engines": {
+    "node": "24.16.x",
+    "npm": "11.13.x"
+  },
+  "scripts": {
+    "build": "node --experimental-strip-types scripts/build.ts dist && node --experimental-strip-types scripts/licenses.ts dist/licenses.txt",
+    "check": "npm run format:check && npm run typecheck && npm run lint && npm test && npm run license:check && npm run bundle:check",
+    "format": "prettier --write .github/workflows/check.yml action.yml release-evidence.json traceability.json eslint.config.mjs tsconfig.json package.json scripts src tests",
+    "format:check": "prettier --check .github/workflows/check.yml action.yml release-evidence.json traceability.json eslint.config.mjs tsconfig.json package.json scripts src tests",
+    "bundle:check": "node --experimental-strip-types scripts/check-bundle.ts",
+    "license:check": "node --experimental-strip-types scripts/check-licenses.ts",
+    "lint": "eslint --max-warnings 0 \"{scripts,src,tests}/**/*.ts\"",
+    "test": "node --experimental-strip-types --test tests/*.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "stream-json": "1.9.1",
+    "tar-stream": "3.1.7"
+  },
+  "devDependencies": {
+    "@types/node": "24.12.4",
+    "@types/stream-json": "1.7.8",
+    "@types/tar-stream": "3.1.4",
+    "esbuild": "0.25.12",
+    "eslint": "10.8.0",
+    "prettier": "3.9.6",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.65.0",
+    "yaml": "2.9.0"
+  }
+}

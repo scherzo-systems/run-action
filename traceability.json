@@ -1,0 +1,245 @@
+{
+  "schemaVersion": 1,
+  "invariants": [
+    {
+      "id": "GHA-RUN-INV-001",
+      "owner": "action",
+      "evidence": ["src/execution.ts", "tests/execution.test.ts"]
+    },
+    {
+      "id": "GHA-RUN-INV-002",
+      "owner": "release",
+      "evidence": ["release-evidence.json", "tests/bootstrap.test.ts"]
+    },
+    {
+      "id": "GHA-RUN-INV-003",
+      "owner": "action",
+      "evidence": ["src/bootstrap.ts", "tests/bootstrap.test.ts"]
+    },
+    {
+      "id": "GHA-RUN-INV-004",
+      "owner": "action",
+      "evidence": ["src/inputs.ts", "tests/inputs-environment-github.test.ts"]
+    },
+    {
+      "id": "GHA-RUN-INV-005",
+      "owner": "action",
+      "evidence": ["src/execution.ts", "tests/execution.test.ts"]
+    },
+    {
+      "id": "GHA-RUN-INV-006",
+      "owner": "artifact-set-delegated",
+      "evidence": ["src/result.ts", "tests/result.test.ts"]
+    },
+    {
+      "id": "GHA-RUN-INV-007",
+      "owner": "action",
+      "evidence": ["src/main.ts", "action.yml"]
+    },
+    {
+      "id": "GHA-RUN-INV-008",
+      "owner": "action",
+      "evidence": ["action.yml", "tests/metadata-release.test.ts"]
+    },
+    {
+      "id": "GHA-RUN-INV-009",
+      "owner": "action",
+      "evidence": ["src/main.ts", "tests/main.test.ts"]
+    },
+    {
+      "id": "GHA-RUN-INV-010",
+      "owner": "documentation",
+      "evidence": ["action.yml", "README.md"]
+    },
+    {
+      "id": "GHA-RUN-INV-011",
+      "owner": "action",
+      "evidence": [
+        "src/environment.ts",
+        "src/github.ts",
+        "tests/inputs-environment-github.test.ts"
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "id": "GHA-RUN-001",
+      "owner": "mirror",
+      "evidence": [
+        "../../scripts/export-run-action-source",
+        "../../infra/scripts/test-run-action-publication"
+      ]
+    },
+    {
+      "id": "GHA-RUN-002",
+      "owner": "documentation",
+      "evidence": [
+        "README.md#public-distribution",
+        "../../docs/specs/github-run-action-v1.md#4-public-identity-and-revision-selection"
+      ]
+    },
+    {
+      "id": "GHA-RUN-003",
+      "owner": "release",
+      "evidence": ["release-evidence.json", "src/release.ts"]
+    },
+    {
+      "id": "GHA-RUN-004",
+      "owner": "action",
+      "evidence": ["src/bootstrap.ts", "tests/bootstrap.test.ts"]
+    },
+    {
+      "id": "GHA-RUN-005",
+      "owner": "action",
+      "evidence": [
+        "src/bootstrap.ts",
+        "tests/bootstrap.test.ts",
+        "tests/main.test.ts"
+      ]
+    },
+    {
+      "id": "GHA-RUN-006",
+      "owner": "action",
+      "evidence": ["src/github.ts", "tests/bootstrap.test.ts"]
+    },
+    {
+      "id": "GHA-RUN-007",
+      "owner": "cli-delegated",
+      "evidence": ["../../docs/specs/workflow-run-cli.md#41-execution-root"]
+    },
+    {
+      "id": "GHA-RUN-008",
+      "owner": "action",
+      "evidence": ["action.yml", "tests/metadata-release.test.ts"]
+    },
+    {
+      "id": "GHA-RUN-009",
+      "owner": "action",
+      "evidence": ["src/inputs.ts", "tests/inputs-environment-github.test.ts"]
+    },
+    {
+      "id": "GHA-RUN-010",
+      "owner": "action",
+      "evidence": ["src/inputs.ts", "tests/inputs-environment-github.test.ts"]
+    },
+    {
+      "id": "GHA-RUN-011",
+      "owner": "action",
+      "evidence": ["src/execution.ts", "tests/execution.test.ts"]
+    },
+    {
+      "id": "GHA-RUN-012",
+      "owner": "action",
+      "evidence": [
+        "src/inputs.ts",
+        "src/execution.ts",
+        "tests/inputs-environment-github.test.ts"
+      ]
+    },
+    {
+      "id": "GHA-RUN-013",
+      "owner": "action",
+      "evidence": ["src/inputs.ts", "tests/execution.test.ts"]
+    },
+    {
+      "id": "GHA-RUN-014",
+      "owner": "action",
+      "evidence": ["src/inputs.ts", "tests/inputs-environment-github.test.ts"]
+    },
+    {
+      "id": "GHA-RUN-015",
+      "owner": "action",
+      "evidence": [
+        "src/inputs.ts",
+        "src/execution.ts",
+        "tests/inputs-environment-github.test.ts"
+      ]
+    },
+    {
+      "id": "GHA-RUN-016",
+      "owner": "action",
+      "evidence": ["src/execution.ts", "tests/execution.test.ts"]
+    },
+    {
+      "id": "GHA-RUN-017",
+      "owner": "cli-delegated",
+      "evidence": [
+        "../../docs/specs/workflow-run-cli.md#31-source-selection-and-resolution"
+      ]
+    },
+    {
+      "id": "GHA-RUN-018",
+      "owner": "action",
+      "evidence": [
+        "src/environment.ts",
+        "src/github.ts",
+        "tests/inputs-environment-github.test.ts"
+      ]
+    },
+    {
+      "id": "GHA-RUN-019",
+      "owner": "action",
+      "evidence": ["action.yml", "src/bootstrap.ts"]
+    },
+    {
+      "id": "GHA-RUN-020",
+      "owner": "action",
+      "evidence": ["src/execution.ts", "tests/execution.test.ts"]
+    },
+    {
+      "id": "GHA-RUN-021",
+      "owner": "action",
+      "evidence": ["src/execution.ts", "tests/execution.test.ts"]
+    },
+    {
+      "id": "GHA-RUN-022",
+      "owner": "action",
+      "evidence": ["action.yml", "tests/metadata-release.test.ts"]
+    },
+    {
+      "id": "GHA-RUN-023",
+      "owner": "action",
+      "evidence": ["src/main.ts", "tests/main.test.ts"]
+    },
+    {
+      "id": "GHA-RUN-024",
+      "owner": "artifact-set-delegated",
+      "evidence": ["src/result.ts", "tests/result.test.ts"]
+    },
+    {
+      "id": "GHA-RUN-025",
+      "owner": "action",
+      "evidence": ["src/result.ts", "tests/result.test.ts"]
+    },
+    {
+      "id": "GHA-RUN-026",
+      "owner": "artifact-set-delegated",
+      "evidence": ["src/result.ts", "tests/result.test.ts"]
+    },
+    {
+      "id": "GHA-RUN-027",
+      "owner": "action",
+      "evidence": ["src/result.ts", "tests/result.test.ts"]
+    },
+    {
+      "id": "GHA-RUN-028",
+      "owner": "action",
+      "evidence": ["src/result.ts", "tests/result.test.ts"]
+    },
+    {
+      "id": "GHA-RUN-029",
+      "owner": "action",
+      "evidence": ["src/result.ts", "tests/result.test.ts"]
+    },
+    {
+      "id": "GHA-RUN-030",
+      "owner": "action",
+      "evidence": ["src/main.ts", "tests/main.test.ts"]
+    },
+    {
+      "id": "GHA-RUN-031",
+      "owner": "action",
+      "evidence": ["src/errors.ts", "tests/main.test.ts"]
+    }
+  ]
+}

@@ -1,0 +1,128 @@
+name: Check
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  source:
+    name: Public source
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install pinned Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.16.1
+          cache: npm
+      - name: Install pinned npm
+        run: npm install --global npm@11.13.0
+      - name: Check standalone package
+        run: |
+          set -euo pipefail
+          npm ci
+          npm run check
+
+  behavior:
+    name: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        runner:
+          - ubuntu-24.04
+          - ubuntu-24.04-arm
+          - macos-15
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 15
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Prepare live behavior fixtures
+        shell: bash
+        run: |
+          set -euo pipefail
+          fixture_root="$RUNNER_TEMP/run-action-live"
+          decoy_root="$RUNNER_TEMP/run-action-decoy"
+          mkdir -p "$fixture_root" "$decoy_root"
+          cat >"$fixture_root/success.yml" <<'YAML'
+          schemaVersion: 1
+          steps:
+            succeed:
+              kind: cmd
+              command:
+                argv: ["bash", "-c", "printf 'native behavior passed\\n'"]
+          YAML
+          cat >"$fixture_root/failure.yml" <<'YAML'
+          schemaVersion: 1
+          steps:
+            fail:
+              kind: cmd
+              command:
+                argv: ["bash", "-c", "exit 7"]
+          YAML
+          cat >"$decoy_root/scherzo-cloud" <<'SH'
+          #!/bin/sh
+          echo "ambient CLI decoy executed" >&2
+          exit 99
+          SH
+          chmod +x "$decoy_root/scherzo-cloud"
+          echo "$decoy_root" >>"$GITHUB_PATH"
+      - name: Run successful command workflow
+        id: success
+        uses: ./
+        with:
+          workflow: ${{ runner.temp }}/run-action-live/success.yml
+          source-root: ${{ runner.temp }}/run-action-live
+          execution-root: ${{ runner.temp }}/run-action-live
+      - name: Verify successful retained result and CLI path
+        shell: bash
+        env:
+          ACTION_OUTCOME: ${{ steps.success.outputs.outcome }}
+          RUN_DIRECTORY: ${{ steps.success.outputs.run-directory }}
+          ARTIFACT_SET: ${{ steps.success.outputs.artifact-set-path }}
+          RESULT_PATH: ${{ steps.success.outputs.result-path }}
+        run: |
+          set -euo pipefail
+          test "$ACTION_OUTCOME" = succeeded
+          test -d "$RUN_DIRECTORY"
+          test -d "$ARTIFACT_SET"
+          test -f "$RESULT_PATH"
+          test "$(command -v scherzo-cloud)" != "$RUNNER_TEMP/run-action-decoy/scherzo-cloud"
+          scherzo-cloud version --json >"$RUNNER_TEMP/verified-version.json"
+          test -s "$RUNNER_TEMP/verified-version.json"
+      - name: Run failing command workflow
+        id: failure
+        continue-on-error: true
+        uses: ./
+        with:
+          workflow: ${{ runner.temp }}/run-action-live/failure.yml
+          source-root: ${{ runner.temp }}/run-action-live
+          execution-root: ${{ runner.temp }}/run-action-live
+      - name: Verify failure propagation and retained result
+        shell: bash
+        env:
+          ACTION_OUTCOME: ${{ steps.failure.outputs.outcome }}
+          ARTIFACT_SET: ${{ steps.failure.outputs.artifact-set-path }}
+          RESULT_PATH: ${{ steps.failure.outputs.result-path }}
+          STEP_OUTCOME: ${{ steps.failure.outcome }}
+        run: |
+          set -euo pipefail
+          test "$STEP_OUTCOME" = failure
+          test "$ACTION_OUTCOME" = failed
+          test -d "$ARTIFACT_SET"
+          test -f "$RESULT_PATH"
