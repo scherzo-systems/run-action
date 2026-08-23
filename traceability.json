@@ -74,8 +74,9 @@
       "id": "GHA-RUN-002",
       "owner": "documentation",
       "evidence": [
-        "README.md#public-distribution",
-        "../../docs/specs/github-run-action-v1.md#4-public-identity-and-revision-selection"
+        "README.md#run-one-workflow",
+        "examples/nightly-sentry-repair/.github/workflows/nightly-sentry-repair.yml",
+        "tests/examples.test.ts"
       ]
     },
     {

@@ -60,11 +60,49 @@ workflow source, and an existing execution directory. Supported runners are:
 
 Windows and macOS x86-64 are not supported by V1.
 
-> [!IMPORTANT]
-> Supported copy-and-paste examples are intentionally deferred until an immutable
-> public Action revision has passed the native runner checks. Public callers must pin
-> `scherzo-systems/run-action` with a real full 40-character commit SHA. Do not pin
-> `main`; V1 provides no moving `v1` or `latest` tag.
+## Run one workflow
+
+This command-only example pins the first public mirror revision whose source and all
+three native runner jobs passed. The caller owns checkout; the Action owns only the one
+local workflow invocation and leaves its paths available to later steps in the same job.
+
+```yaml
+permissions:
+  contents: read
+
+steps:
+  - name: Check out caller repository
+    uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+    with:
+      persist-credentials: false
+  - name: Run checked-in Scherzo workflow
+    id: scherzo
+    uses: scherzo-systems/run-action@deb84786f26c01835c9d3590d3304125ed9d0273
+    with:
+      workflow: .scherzo/workflows/ci.yaml
+  - name: Consume the retained result in the same job
+    if: ${{ always() && steps.scherzo.outputs.result-path != '' }}
+    env:
+      ARTIFACT_SET_PATH: ${{ steps.scherzo.outputs.artifact-set-path }}
+      RESULT_PATH: ${{ steps.scherzo.outputs.result-path }}
+      WORKFLOW_OUTCOME: ${{ steps.scherzo.outputs.outcome }}
+    run: |
+      set -euo pipefail
+      test -d "$ARTIFACT_SET_PATH"
+      test -f "$RESULT_PATH"
+      scherzo-cloud artifact validate --json "$ARTIFACT_SET_PATH" >/dev/null
+      printf 'workflow outcome: %s\n' "$WORKFLOW_OUTCOME"
+```
+
+Agent workflows also require caller-owned harness preparation and provider credentials.
+The complete [nightly Sentry repair composition](examples/nightly-sentry-repair/README.md)
+shows agent-produced JSON discovery, a bounded GitHub matrix, explicit model and Pi setup,
+retained `git_branch` output, and a separately credentialed publisher isolated on a
+fresh runner with an attested induced-failure check.
+
+V1 provides no moving `v1`, `latest`, or semantic-version tag. Do not replace the SHA in
+these examples with `main`, another branch or tag, an abbreviated value, or a Scherzo
+Cloud monorepo commit.
 
 ## Inputs
 
@@ -134,6 +172,14 @@ Each Action revision carries its exact CLI release contract in
 [`release-evidence.json`](release-evidence.json). Runtime bootstrap consumes that closed
 record directly, verifies the downloaded release, and never performs a `latest` lookup
 or falls back to an ambient CLI.
+
+## Recovery
+
+If a selected immutable Action revision is defective, choose a previously tested full
+mirror SHA for future jobs. A published revision remains public: do not delete it,
+force-move a reference, replace the SHA with a moving branch or tag, or claim that
+selecting an older SHA erases the defective bytes. Publish any correction as a reviewed,
+fully tested fast-forward revision.
 
 ## Development
 

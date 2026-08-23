@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Bounded Sentry repair matrix",
+  "type": "object",
+  "properties": {
+    "include": {
+      "type": "array",
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "properties": {
+          "issue": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[0-9]+$",
+                "maxLength": 32
+              },
+              "shortId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 512
+              },
+              "permalink": {
+                "type": "string",
+                "format": "uri",
+                "maxLength": 2048
+              }
+            },
+            "required": ["id", "shortId", "title", "permalink"],
+            "additionalProperties": false
+          }
+        },
+        "required": ["issue"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["include"],
+  "additionalProperties": false
+}
