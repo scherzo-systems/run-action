@@ -23,6 +23,7 @@ steps:
     outputs:
       changes:
         kind: git_branch
+        from: workspace
 
 exports:
   changes:

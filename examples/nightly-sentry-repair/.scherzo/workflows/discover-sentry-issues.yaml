@@ -21,7 +21,8 @@ steps:
           - file: ../prompts/discover-sentry-request.md
     outputs:
       issueMatrix:
-        kind: agent_result
+        kind: json
+        from: agent_result
         schema: ../schemas/sentry-issue-matrix.schema.json
 
 exports:

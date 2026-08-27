@@ -282,7 +282,7 @@ test("nightly composition keeps setup, bounded repair, and publication caller-ow
   );
 });
 
-test("Sentry discovery uses agent_result and repair retains git_branch", async () => {
+test("Sentry workflows use semantic JSON and Git outputs", async () => {
   const discovery = parse(
     await readFile(
       path.join(
@@ -305,7 +305,10 @@ test("Sentry discovery uses agent_result and repair retains git_branch", async (
       string,
       {
         kind: string;
-        outputs: Record<string, { kind: string; schema?: string }>;
+        outputs: Record<
+          string,
+          { kind: string; from: string; schema?: string }
+        >;
       }
     >;
     exports: Record<string, { ref: string }>;
@@ -316,7 +319,8 @@ test("Sentry discovery uses agent_result and repair retains git_branch", async (
   });
   assert.equal(discovery.steps.discover?.kind, "agent");
   assert.deepEqual(discovery.steps.discover?.outputs.issueMatrix, {
-    kind: "agent_result",
+    kind: "json",
+    from: "agent_result",
     schema: "../schemas/sentry-issue-matrix.schema.json",
   });
   assert.deepEqual(discovery.exports.issueMatrix, {
@@ -354,7 +358,10 @@ test("Sentry discovery uses agent_result and repair retains git_branch", async (
         };
       }
     >;
-    steps: Record<string, { outputs: Record<string, { kind: string }> }>;
+    steps: Record<
+      string,
+      { outputs: Record<string, { kind: string; from: string }> }
+    >;
     exports: Record<string, { ref: string }>;
   };
   assert.deepEqual(repair.agentProfiles.repair?.harness, {
@@ -363,6 +370,7 @@ test("Sentry discovery uses agent_result and repair retains git_branch", async (
   });
   assert.deepEqual(repair.steps.repair?.outputs.changes, {
     kind: "git_branch",
+    from: "workspace",
   });
   assert.deepEqual(repair.exports.changes, {
     ref: "outputs.repair.changes",
