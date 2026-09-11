@@ -98,9 +98,8 @@ For a useful agent example, start with
 [resolve a PR's merge conflicts](examples/resolve-pr-conflicts/README.md): comment
 `/resolve-conflicts`, let an agent resolve the merge and run your checks, then publish
 from an isolated job. The example supplies the helper code; customize the checks and
-repair instructions. The Action embeds CLI v0.32.0, including the conditional-skip
-fix. Before enabling the example, update its SHA after this Action refresh is
-published and verified, as described in the example's setup notes.
+repair instructions. The example pins a verified Action revision embedding CLI
+v0.32.0, including the conditional-skip fix.
 
 The advanced [nightly Sentry repair composition](examples/nightly-sentry-repair/README.md)
 adds agent-produced JSON discovery, a bounded GitHub matrix, and publisher

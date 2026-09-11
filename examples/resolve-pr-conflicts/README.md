@@ -3,9 +3,7 @@
 Comment `/resolve-conflicts` on a pull request. Codex resolves the merge, Scherzo
 runs your checks, and a separate job pushes one merge commit back to the PR.
 
-**Before enabling:** replace the example's Action SHA after this Action refresh
-is published and verified. The existing public SHA embeds CLI v0.15.0 and cannot
-run this DAG; this Action refresh embeds the fixed CLI v0.32.0.
+This example pins a verified Run Action revision embedding CLI v0.32.0.
 
 The bundled Action's no-conflict path has passed with the published CLI v0.32.0
 and Codex 0.153.4, without model credentials. A live GitHub/model trial remains

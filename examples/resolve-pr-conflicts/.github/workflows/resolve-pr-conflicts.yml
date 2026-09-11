@@ -68,9 +68,7 @@ jobs:
           CODEX_HOME: ${{ runner.temp }}/codex
       - name: Prepare, resolve, and check the merge
         id: repair
-        # Before enabling: replace this SHA with the verified public commit
-        # for the Action refresh embedding CLI v0.32.0.
-        uses: scherzo-systems/run-action@deb84786f26c01835c9d3590d3304125ed9d0273
+        uses: scherzo-systems/run-action@3926e264752beb8702618f2969fcece5f011d5c2
         with:
           workflow: automation/.scherzo/workflows/resolve-pr-conflicts.yaml
           source-root: automation/.scherzo
