@@ -13,11 +13,11 @@
   "scripts": {
     "build": "node --experimental-strip-types scripts/build.ts dist && node --experimental-strip-types scripts/licenses.ts dist/licenses.txt",
     "check": "npm run format:check && npm run typecheck && npm run lint && npm test && npm run license:check && npm run bundle:check",
-    "format": "prettier --write .github/workflows/check.yml action.yml release-evidence.json traceability.json eslint.config.mjs tsconfig.json package.json scripts src tests",
-    "format:check": "prettier --check .github/workflows/check.yml action.yml release-evidence.json traceability.json eslint.config.mjs tsconfig.json package.json scripts src tests",
+    "format": "prettier --write .github/workflows/check.yml action.yml release-evidence.json traceability.json eslint.config.mjs tsconfig.json package.json scripts src tests examples/resolve-pr-conflicts",
+    "format:check": "prettier --check .github/workflows/check.yml action.yml release-evidence.json traceability.json eslint.config.mjs tsconfig.json package.json scripts src tests examples/resolve-pr-conflicts",
     "bundle:check": "node --experimental-strip-types scripts/check-bundle.ts",
     "license:check": "node --experimental-strip-types scripts/check-licenses.ts",
-    "lint": "eslint --max-warnings 0 \"{scripts,src,tests}/**/*.ts\"",
+    "lint": "eslint --max-warnings 0 \"{scripts,src,tests,examples}/**/*.ts\"",
     "test": "node --experimental-strip-types --test tests/*.test.ts",
     "typecheck": "tsc --noEmit"
   },

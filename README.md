@@ -94,11 +94,18 @@ steps:
       printf 'workflow outcome: %s\n' "$WORKFLOW_OUTCOME"
 ```
 
-Agent workflows also require caller-owned harness preparation and provider credentials.
-The complete [nightly Sentry repair composition](examples/nightly-sentry-repair/README.md)
-shows agent-produced JSON discovery, a bounded GitHub matrix, explicit model and Pi setup,
-retained `git_branch` output, and a separately credentialed publisher isolated on a
-fresh runner with an attested induced-failure check.
+For a useful agent example, start with
+[resolve a PR's merge conflicts](examples/resolve-pr-conflicts/README.md): comment
+`/resolve-conflicts`, let an agent resolve the merge and run your checks, then publish
+from an isolated job. The example supplies the helper code; customize the checks and
+repair instructions. The Action embeds CLI v0.32.0, including the conditional-skip
+fix. Before enabling the example, update its SHA after this Action refresh is
+published and verified, as described in the example's setup notes.
+
+The advanced [nightly Sentry repair composition](examples/nightly-sentry-repair/README.md)
+adds agent-produced JSON discovery, a bounded GitHub matrix, and publisher
+failure-isolation verification. Agent examples require harness setup and provider
+credentials.
 
 V1 provides no moving `v1`, `latest`, or semantic-version tag. Do not replace the SHA in
 these examples with `main`, another branch or tag, an abbreviated value, or a Scherzo
