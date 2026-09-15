@@ -155,12 +155,12 @@ jobs:
           test "$(command -v scherzo-cloud)" != "$RUNNER_TEMP/run-action-decoy/scherzo-cloud"
           scherzo-cloud version --json >"$RUNNER_TEMP/verified-version.json"
           test -s "$RUNNER_TEMP/verified-version.json"
-      - name: Validate staged named-input DAGs with the installed release
+      - name: Validate active example DAGs with the installed release
         shell: bash
         run: |
           set -euo pipefail
           for example in resolve-pr-conflicts nightly-sentry-repair; do
-            for workflow in examples/"$example"/.scherzo/staged-named-inputs/*.yaml; do
+            for workflow in examples/"$example"/.scherzo/workflows/*.yaml; do
               scherzo-cloud workflow validate --json \
                 --source-root "examples/$example/.scherzo" "$workflow"
             done

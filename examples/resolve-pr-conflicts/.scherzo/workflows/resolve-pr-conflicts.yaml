@@ -2,6 +2,10 @@ schemaVersion: 1
 
 description: Prepare a PR merge, resolve conflicts only when needed, and validate the result.
 
+inputs:
+  request:
+    kind: text
+
 agentProfiles:
   resolver:
     harness:
@@ -15,7 +19,7 @@ steps:
     kind: cmd
     inputs:
       pr:
-        ref: imports.prompt
+        ref: inputs.request
     command:
       argv: [node, ../automation/scripts/resolve-pr-conflicts.ts, prepare]
     outputs:
@@ -35,7 +39,7 @@ steps:
       systemPrompt: ../prompts/resolve-pr-conflicts.md
       message:
         text:
-          - ref: imports.prompt
+          - ref: inputs.request
 
   check:
     kind: cmd

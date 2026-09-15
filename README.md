@@ -62,8 +62,8 @@ Windows and macOS x86-64 are not supported by V1.
 
 ## Run one workflow
 
-This command-only example pins the first public mirror revision whose source and all
-three native runner jobs passed. The caller owns checkout; the Action owns only the one
+This command-only example pins the verified named-input public mirror revision whose
+source and all three native runner jobs passed. The caller owns checkout; the Action owns only the one
 local workflow invocation and leaves its paths available to later steps in the same job.
 
 ```yaml
@@ -77,7 +77,7 @@ steps:
       persist-credentials: false
   - name: Run checked-in Scherzo workflow
     id: scherzo
-    uses: scherzo-systems/run-action@deb84786f26c01835c9d3590d3304125ed9d0273
+    uses: scherzo-systems/run-action@c4fc5925553593aa41fecf683e778b8e08fb8c73
     with:
       workflow: .scherzo/workflows/ci.yaml
   - name: Consume the retained result in the same job
@@ -98,13 +98,12 @@ The source tree also contains a working
 [PR conflict resolver](examples/resolve-pr-conflicts/README.md) and advanced
 [nightly Sentry repair composition](examples/nightly-sentry-repair/README.md). The latter
 adds agent-produced JSON discovery, a bounded GitHub matrix, and publisher
-failure-isolation verification. Both executable examples retain the fixed acquisition
-forms and harness versions accepted by their checked-in immutable Action mirrors.
+failure-isolation verification. Both executable examples use named `request` inputs and
+pin the same verified v0.36.0 Action mirror: JSON for Sentry and Text for the conflict
+resolver. Their harness versions are compatible with that released CLI.
 
-Each example README separately stages its v0.36.0 named `request` workflow and the exact
-paired reference, acquisition, and harness updates for the later named-mirror revision.
-Do not apply only part of a staged recipe or select a named workflow with an older fixed-
-input Action. V1 provides no moving `v1`, `latest`, or semantic-version tag; do not
+Keep each example's reference, acquisition form, workflow, and harness requirements
+paired when upgrading. V1 provides no moving `v1`, `latest`, or semantic-version tag; do not
 improvise with `main`, another branch or tag, an abbreviation, a placeholder, or a
 Scherzo Cloud monorepo commit.
 

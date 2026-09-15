@@ -5,10 +5,10 @@ This example composes the Run Action with caller-owned GitHub Actions setup. Cop
 The workflow intentionally calls a repository-owned `scripts/publish-scherzo-branch`
 program that is not supplied by this Action.
 
-The checked-in executable workflow remains paired with public mirror
-`deb84786f26c01835c9d3590d3304125ed9d0273`, its fixed `prompt` interface, CLI v0.15.0,
-and qualified Pi 0.83.0. Do not combine that immutable Action with the staged named-input
-workflow described below.
+The executable workflow pins verified public mirror
+`c4fc5925553593aa41fecf683e778b8e08fb8c73`, its named-input interface, CLI v0.36.0,
+and qualified Pi 0.85.1. Source and all three native public jobs passed for that exact
+mirror. A provider-live trial of this composition is a separate qualification.
 
 Before enabling the schedule, configure:
 
@@ -18,42 +18,30 @@ Before enabling the schedule, configure:
 - `REPAIR_PUBLISHER_GITHUB_TOKEN` as a separate, repository-scoped publisher credential.
 
 The caller checks out source, configures the local Git author identity used for repair
-commits, installs exact Pi `0.83.0`, chooses the model, limits discovery to ten issues,
+commits, installs exact Pi `0.85.1`, chooses the model, limits discovery to ten issues,
 and bounds matrix concurrency at two. Replace the example author name and email with the
 identity selected by caller policy. Discovery is an agent step whose declared
 `agent_result` is the compact JSON matrix. Each matrix job invokes one repair workflow and
 asks the Action to retain the `changes` export as `git_branch`.
 
-## Named-input successor staging
+## Named JSON request
 
-The separately valid
-[staged repair workflow](.scherzo/staged-named-inputs/repair-sentry-issue.yaml) records the
-v0.36.0 target without breaking the executable fixed-input example. It declares JSON
-`request` and supplies that value directly as an `application/json` agent attachment, so
-it creates no request copy in the caller workspace and has no workflow-owned request file
-to clean after success, failure, or cancellation.
+The [repair workflow](.scherzo/workflows/repair-sentry-issue.yaml) declares JSON `request`
+and supplies it directly as an `application/json` agent attachment. The prompt reads
+that issue object as untrusted context. No request copy is created in the caller
+workspace; the Action owns its private inline-input file and cleanup.
 
-Activate the staged form only in the later reference-update revision, after the first
-named-input Action mirror has passed its public checks. In that one revision:
+The matrix job supplies the issue without converting it into a JSON string:
 
-1. replace both Run Action `uses:` values with that verified full mirror SHA;
-2. replace `.scherzo/workflows/repair-sentry-issue.yaml` with the staged workflow;
-3. replace `prompt: ${{ toJSON(matrix.issue) }}` with:
+```yaml
+inputs: >-
+  {"request":{"kind":"json","value":${{ toJSON(matrix.issue) }}}}
+```
 
-   ```yaml
-   inputs: >-
-     {"request":{"kind":"json","value":${{ toJSON(matrix.issue) }}}}
-   ```
-
-4. change **both** Pi installation steps to the v0.36.0 qualification release:
-
-   ```sh
-   npm install --global @earendil-works/pi-coding-agent@0.85.1
-   ```
-
-CLI v0.36.0 admits Pi `>=0.84.2 <0.86.0`; Pi 0.85.1 is the independently qualified
-version. Do not update only the Action reference, acquisition form, staged workflow, or
-harness pin. The publication runbook requires this paired revision to pass before use.
+Both jobs install Pi 0.85.1, the independently qualified version within CLI v0.36.0's
+admitted `>=0.84.2 <0.86.0` range. Keep the Action reference, acquisition form, workflow,
+and harness pin paired on future upgrades. Publication checks do not authorize or prove
+provider-live dogfood.
 
 Action output paths remain local to the repair runner. The caller copies the complete,
 already-validated Artifact Set into a private GitHub Actions artifact with one-day

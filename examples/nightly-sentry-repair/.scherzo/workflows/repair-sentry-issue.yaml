@@ -2,6 +2,10 @@ schemaVersion: 1
 
 description: Diagnose and repair one bounded issue in the caller-owned Git workspace.
 
+inputs:
+  request:
+    kind: json
+
 agentProfiles:
   repair:
     harness:
@@ -19,7 +23,8 @@ steps:
       message:
         text:
           - file: ../prompts/repair-sentry-request.md
-          - ref: imports.prompt
+        attachments:
+          - ref: inputs.request
     outputs:
       changes:
         kind: git_branch

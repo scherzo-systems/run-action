@@ -30,10 +30,10 @@ jobs:
         with:
           node-version: 24.16.0
       - name: Install the caller-selected Pi harness
-        run: npm install --global @earendil-works/pi-coding-agent@0.83.0
+        run: npm install --global @earendil-works/pi-coding-agent@0.85.1
       - name: Discover a bounded Sentry issue matrix
         id: discovery
-        uses: scherzo-systems/run-action@deb84786f26c01835c9d3590d3304125ed9d0273
+        uses: scherzo-systems/run-action@c4fc5925553593aa41fecf683e778b8e08fb8c73
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
@@ -69,17 +69,18 @@ jobs:
         with:
           node-version: 24.16.0
       - name: Install the caller-selected Pi harness
-        run: npm install --global @earendil-works/pi-coding-agent@0.83.0
+        run: npm install --global @earendil-works/pi-coding-agent@0.85.1
       - name: Diagnose, repair, and retain one Git branch artifact
         id: repair
-        uses: scherzo-systems/run-action@deb84786f26c01835c9d3590d3304125ed9d0273
+        uses: scherzo-systems/run-action@c4fc5925553593aa41fecf683e778b8e08fb8c73
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         with:
           workflow: .scherzo/workflows/repair-sentry-issue.yaml
           source-root: .scherzo
           execution-root: .
-          prompt: ${{ toJSON(matrix.issue) }}
+          inputs: >-
+            {"request":{"kind":"json","value":${{ toJSON(matrix.issue) }}}}
           export: changes
       - name: Verify same-job result and retained Git carrier
         env:

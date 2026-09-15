@@ -68,13 +68,14 @@ jobs:
           CODEX_HOME: ${{ runner.temp }}/codex
       - name: Prepare, resolve, and check the merge
         id: repair
-        uses: scherzo-systems/run-action@3926e264752beb8702618f2969fcece5f011d5c2
+        uses: scherzo-systems/run-action@c4fc5925553593aa41fecf683e778b8e08fb8c73
         with:
           workflow: automation/.scherzo/workflows/resolve-pr-conflicts.yaml
           source-root: automation/.scherzo
           execution-root: pr
           export: resolution
-          prompt: ${{ needs.authorize.outputs.pr }}
+          inputs: >-
+            {"request":{"kind":"text","value":${{ toJSON(needs.authorize.outputs.pr) }}}}
         env:
           CODEX_HOME: ${{ runner.temp }}/codex
       - name: Hand off the Git bundle
