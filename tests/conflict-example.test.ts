@@ -23,6 +23,8 @@ import {
 } from "../examples/resolve-pr-conflicts/scripts/resolve-pr-conflicts.ts";
 
 const repository = "example/project";
+const verifiedRunAction =
+  "scherzo-systems/run-action@3926e264752beb8702618f2969fcece5f011d5c2";
 const head = "1".repeat(40);
 const base = "2".repeat(40);
 const pr = {
@@ -292,6 +294,7 @@ test("example gates agent secrets and isolates publication from the PR tree", ()
     step.uses?.startsWith("scherzo-systems/run-action@"),
   );
   assert.ok(repair);
+  assert.equal(repair.uses, verifiedRunAction);
   assert.deepEqual(repair.env, {
     CODEX_HOME: "${{ runner.temp }}/codex",
   });
@@ -302,6 +305,7 @@ test("example gates agent secrets and isolates publication from the PR tree", ()
   assert.ok(resolve.steps.indexOf(login) < resolve.steps.indexOf(repair));
   assert.equal(upload?.if, "steps.repair.outputs.export-state == 'available'");
   assert.equal(repair.with?.prompt, "${{ needs.authorize.outputs.pr }}");
+  assert.equal(repair.with?.inputs, undefined);
   assert.equal(login.env?.CODEX_HOME, repair.env.CODEX_HOME);
   assert.match(
     login.run ?? "",
@@ -331,16 +335,25 @@ test("example gates agent secrets and isolates publication from the PR tree", ()
       "utf8",
     ),
   ) as {
+    inputs?: Record<string, { kind: string }>;
     agentProfiles: { resolver: { harness: { kind: string } } };
     steps: {
       prepare: { inputs: Record<string, { ref: string }> };
-      resolve: { condition: unknown };
+      resolve: {
+        condition: unknown;
+        agent: { message: { text: { ref: string }[] } };
+      };
       check: { condition: unknown; outputs: Record<string, { kind: string }> };
     };
     exports: Record<string, { ref: string }>;
   };
+  assert.equal(scherzo.inputs, undefined);
   assert.equal(scherzo.agentProfiles.resolver.harness.kind, "codex");
   assert.equal(scherzo.steps.prepare.inputs.pr?.ref, "imports.prompt");
+  assert.equal(
+    scherzo.steps.resolve.agent.message.text.at(-1)?.ref,
+    "imports.prompt",
+  );
   assert.deepEqual(scherzo.steps.resolve.condition, {
     equals: [{ ref: "outputs.prepare.needed" }, { value: "true" }],
   });
@@ -349,4 +362,20 @@ test("example gates agent secrets and isolates publication from the PR tree", ()
   });
   assert.equal(scherzo.steps.check.outputs.resolution?.kind, "git_branch");
   assert.equal(scherzo.exports.resolution?.ref, "outputs.check.resolution");
+
+  const staged = parse(
+    readFileSync(
+      path.join(
+        example,
+        ".scherzo/staged-named-inputs/resolve-pr-conflicts.yaml",
+      ),
+      "utf8",
+    ),
+  ) as typeof scherzo;
+  assert.deepEqual(staged.inputs?.request, { kind: "text" });
+  assert.equal(staged.steps.prepare.inputs.pr?.ref, "inputs.request");
+  assert.equal(
+    staged.steps.resolve.agent.message.text.at(-1)?.ref,
+    "inputs.request",
+  );
 });

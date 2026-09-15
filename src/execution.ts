@@ -16,7 +16,7 @@ import path from "node:path";
 
 import { AdapterError, asAdapterError } from "./errors.ts";
 import { WorkflowCommandGuard } from "./github.ts";
-import type { ActionInputs } from "./inputs.ts";
+import type { ActionInputs, NamedInput } from "./inputs.ts";
 
 export const MAXIMUM_TERMINAL_JSON_BYTES = 202_100_000;
 
@@ -54,11 +54,17 @@ export const DEFAULT_EXECUTION_DEPENDENCIES: ExecutionDependencies = {
   maximumTerminalBytes: MAXIMUM_TERMINAL_JSON_BYTES,
 };
 
+export interface PrivateInputFile {
+  readonly name: string;
+  readonly kind: "text" | "json";
+  readonly path: string;
+}
+
 export interface ExecutionAllocation {
   readonly parent: string;
   readonly runDirectory: string;
   readonly terminalPath: string;
-  readonly promptPath?: string;
+  readonly inputFiles: readonly PrivateInputFile[];
 }
 
 export interface WorkflowProcessResult {
@@ -72,7 +78,7 @@ export interface WorkflowProcessResult {
 
 export async function allocateExecution(
   runnerTemp: string | undefined,
-  prompt: string | undefined,
+  namedInputs: readonly NamedInput[],
 ): Promise<ExecutionAllocation> {
   if (!runnerTemp || !path.isAbsolute(runnerTemp)) {
     throw new AdapterError("input_invalid");
@@ -92,6 +98,7 @@ export async function allocateExecution(
   });
   const runDirectory = path.join(parent, "run");
   const terminalPath = path.join(parent, ".terminal.json");
+  const inputFiles: PrivateInputFile[] = [];
   try {
     await chmod(parent, 0o700);
     const terminalHandle = await open(
@@ -105,24 +112,33 @@ export async function allocateExecution(
       await terminalHandle.close();
     }
     await chmod(terminalPath, 0o600);
-    if (prompt === undefined) {
-      return { parent, runDirectory, terminalPath };
-    }
 
-    const promptPath = path.join(parent, ".prompt");
-    const promptHandle = await open(
-      promptPath,
-      fsConstants.O_CREAT | fsConstants.O_EXCL | fsConstants.O_WRONLY,
-      0o600,
-    );
-    try {
-      await promptHandle.writeFile(Buffer.from(prompt, "utf8"));
-      await promptHandle.sync();
-    } finally {
-      await promptHandle.close();
+    for (const [index, input] of namedInputs.entries()) {
+      if (
+        (input.kind !== "text" && input.kind !== "json") ||
+        input.source.kind !== "inline"
+      ) {
+        continue;
+      }
+      const inputPath = path.join(
+        parent,
+        `.input-${String(index).padStart(4, "0")}`,
+      );
+      const handle = await open(
+        inputPath,
+        fsConstants.O_CREAT | fsConstants.O_EXCL | fsConstants.O_WRONLY,
+        0o600,
+      );
+      try {
+        await handle.writeFile(Buffer.from(input.source.value, "utf8"));
+        await handle.sync();
+      } finally {
+        await handle.close();
+      }
+      await chmod(inputPath, 0o600);
+      inputFiles.push({ name: input.name, kind: input.kind, path: inputPath });
     }
-    await chmod(promptPath, 0o600);
-    return { parent, runDirectory, terminalPath, promptPath };
+    return { parent, runDirectory, terminalPath, inputFiles };
   } catch (error) {
     await rm(parent, { recursive: true, force: true }).catch(() => undefined);
     throw error instanceof AdapterError
@@ -148,12 +164,34 @@ export function workflowArguments(
     inputs.maximumParallel,
     "--json",
   ];
-  const promptPath = allocation.promptPath ?? inputs.promptFile;
-  if (promptPath !== undefined) {
-    arguments_.push("--prompt-file", promptPath);
-  }
-  for (const attachment of inputs.attachments) {
-    arguments_.push("--attachment", attachment.mediaType, attachment.path);
+  const privateFiles = new Map(
+    allocation.inputFiles.map((input) => [
+      `${input.kind}:${input.name}`,
+      input.path,
+    ]),
+  );
+  for (const input of inputs.namedInputs) {
+    if (input.kind === "text" || input.kind === "json") {
+      const inputPath =
+        input.source.kind === "path"
+          ? input.source.path
+          : privateFiles.get(`${input.kind}:${input.name}`);
+      if (inputPath === undefined) throw new AdapterError("allocation_failed");
+      arguments_.push(`--input-${input.kind}-file`, input.name, inputPath);
+    } else if (input.kind === "file") {
+      arguments_.push("--input-file", input.name, input.mediaType, input.path);
+    } else if (input.items.length === 0) {
+      arguments_.push("--input-attachments-empty", input.name);
+    } else {
+      for (const item of input.items) {
+        arguments_.push(
+          "--input-attachment",
+          input.name,
+          item.mediaType,
+          item.path,
+        );
+      }
+    }
   }
   arguments_.push(inputs.workflow);
   return arguments_;
@@ -204,6 +242,7 @@ export async function runWorkflow(
   allocation: ExecutionAllocation,
   environment: NodeJS.ProcessEnv,
   dependencies: ExecutionDependencies = DEFAULT_EXECUTION_DEPENDENCIES,
+  cancellation?: AbortSignal,
 ): Promise<WorkflowProcessResult> {
   const arguments_ = workflowArguments(inputs, allocation);
   if (await lstat(allocation.runDirectory).catch(() => undefined)) {
@@ -264,6 +303,14 @@ export async function runWorkflow(
   const onTerminate = forward("SIGTERM");
   dependencies.signals.on("SIGINT", onInterrupt);
   dependencies.signals.on("SIGTERM", onTerminate);
+  const onCancellation = () => {
+    if (cancellation?.reason === "SIGINT") onInterrupt();
+    else onTerminate();
+  };
+  cancellation?.addEventListener("abort", onCancellation);
+  // A signal can arrive during asynchronous launch preparation, before the
+  // child exists. Forward that pending cancellation once after spawning.
+  if (cancellation?.aborted) onCancellation();
 
   const stderrPromise = (async () => {
     for await (const value of child.stderr) {
@@ -307,6 +354,7 @@ export async function runWorkflow(
     active = false;
     dependencies.signals.off("SIGINT", onInterrupt);
     dependencies.signals.off("SIGTERM", onTerminate);
+    cancellation?.removeEventListener("abort", onCancellation);
     try {
       await guard.stop();
     } catch {
@@ -319,8 +367,8 @@ export async function cleanupExecution(
   allocation: ExecutionAllocation,
 ): Promise<void> {
   let failed = false;
-  if (allocation.promptPath !== undefined) {
-    await rm(allocation.promptPath, { force: true }).catch(() => {
+  for (const input of allocation.inputFiles) {
+    await rm(input.path, { force: true }).catch(() => {
       failed = true;
     });
   }
@@ -334,13 +382,11 @@ export async function cleanupExecution(
     });
     if (await lstat(allocation.parent).catch(() => undefined)) failed = true;
   } else {
-    if (
-      (allocation.promptPath !== undefined &&
-        (await lstat(allocation.promptPath).catch(() => undefined))) ||
-      (await lstat(allocation.terminalPath).catch(() => undefined))
-    ) {
-      failed = true;
+    for (const input of allocation.inputFiles) {
+      if (await lstat(input.path).catch(() => undefined)) failed = true;
     }
+    if (await lstat(allocation.terminalPath).catch(() => undefined))
+      failed = true;
   }
   if (failed) throw new AdapterError("cleanup_failed");
 }

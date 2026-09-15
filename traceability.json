@@ -9,7 +9,11 @@
     {
       "id": "GHA-RUN-INV-002",
       "owner": "release",
-      "evidence": ["release-evidence.json", "tests/bootstrap.test.ts"]
+      "evidence": [
+        "release-evidence.json",
+        "tests/bootstrap.test.ts",
+        "tests/release-integration.test.ts"
+      ]
     },
     {
       "id": "GHA-RUN-INV-003",
@@ -24,7 +28,11 @@
     {
       "id": "GHA-RUN-INV-005",
       "owner": "action",
-      "evidence": ["src/execution.ts", "tests/execution.test.ts"]
+      "evidence": [
+        "src/execution.ts",
+        "tests/execution.test.ts",
+        "tests/release-integration.test.ts"
+      ]
     },
     {
       "id": "GHA-RUN-INV-006",
@@ -82,7 +90,11 @@
     {
       "id": "GHA-RUN-003",
       "owner": "release",
-      "evidence": ["release-evidence.json", "src/release.ts"]
+      "evidence": [
+        "release-evidence.json",
+        "src/release.ts",
+        "tests/release-integration.test.ts"
+      ]
     },
     {
       "id": "GHA-RUN-004",
@@ -121,12 +133,20 @@
     {
       "id": "GHA-RUN-010",
       "owner": "action",
-      "evidence": ["src/inputs.ts", "tests/inputs-environment-github.test.ts"]
+      "evidence": [
+        "src/inputs.ts",
+        "tests/inputs-environment-github.test.ts",
+        "tests/release-integration.test.ts"
+      ]
     },
     {
       "id": "GHA-RUN-011",
       "owner": "action",
-      "evidence": ["src/execution.ts", "tests/execution.test.ts"]
+      "evidence": [
+        "src/execution.ts",
+        "tests/execution.test.ts",
+        "tests/release-integration.test.ts"
+      ]
     },
     {
       "id": "GHA-RUN-012",

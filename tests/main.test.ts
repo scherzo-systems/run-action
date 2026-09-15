@@ -1,18 +1,20 @@
 import assert from "node:assert/strict";
-import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { access, mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 
 import type { BootstrapResult } from "../src/bootstrap.ts";
 import { AdapterError } from "../src/errors.ts";
-import type {
-  ExecutionAllocation,
-  WorkflowProcessResult,
+import {
+  allocateExecution,
+  cleanupExecution,
+  type ExecutionAllocation,
+  type WorkflowProcessResult,
 } from "../src/execution.ts";
 import { emptyOutputs, type ActionOutputs } from "../src/github.ts";
 import { recoverDurableRun } from "../src/identity.ts";
-import type { ActionInputs } from "../src/inputs.ts";
+import { readActionInputs, type ActionInputs } from "../src/inputs.ts";
 import { executeAction, type ActionDependencies } from "../src/main.ts";
 import type {
   SelectedProjection,
@@ -57,6 +59,48 @@ test("bootstrap rejection precedes every workflow input read and launch", async 
   assert.equal(inputReads, 0);
   assert.equal(launches, 0);
   assert.deepEqual(observedOutputs, emptyOutputs());
+});
+
+test("invalid acquisition documents fail before source reads and allocation", async () => {
+  const workspace = await mkdtemp(
+    path.join(os.tmpdir(), "scherzo-main-inputs-"),
+  );
+  try {
+    const source = path.join(workspace, "must-not-be-read");
+    await writeFile(source, "private", { mode: 0o000 });
+    let allocations = 0;
+    const result = await executeAction(
+      {
+        GITHUB_WORKSPACE: workspace,
+        GITHUB_OUTPUT: path.join(workspace, "github-output"),
+        INPUT_WORKFLOW: "workflow.yaml",
+        INPUT_INPUTS:
+          '{"privateValue":{"kind":"json","path":"must-not-be-read","unknown":true}}',
+      },
+      {
+        bootstrap: async () => ({
+          executable: "/verified/scherzo-cloud",
+          cliDirectory: "/verified",
+          environment: {},
+        }),
+        readInputs: readActionInputs,
+        allocate: () => {
+          allocations += 1;
+          return unreachable<ExecutionAllocation>();
+        },
+        execute: () => unreachable<WorkflowProcessResult>(),
+        readTerminal: () => unreachable<TerminalEnvelope>(),
+        recover: async () => undefined,
+        project: () => unreachable<ValidatedResultProjection>(),
+        writeOutputs: async () => undefined,
+        cleanup: async () => undefined,
+      },
+    );
+    assert.equal(result.failure?.code, "input_invalid");
+    assert.equal(allocations, 0);
+  } finally {
+    await rm(workspace, { recursive: true, force: true });
+  }
 });
 
 test("result and process matrix preserves trustworthy outputs and failure precedence", async (t) => {
@@ -123,13 +167,14 @@ test("result and process matrix preserves trustworthy outputs and failure preced
           parent: root,
           runDirectory,
           terminalPath: path.join(root, ".terminal.json"),
+          inputFiles: [],
         };
         const actionInputs: ActionInputs = {
           workspace: root,
           workflow: path.join(root, "workflow.yaml"),
           sourceRoot: root,
           executionRoot: root,
-          attachments: [],
+          namedInputs: [],
           maximumParallel: "1",
           selectedExport: "selected",
         };
@@ -229,6 +274,7 @@ test("bare durable markers cannot expose terminal-less result outputs", async ()
       parent: root,
       runDirectory,
       terminalPath: path.join(root, ".terminal.json"),
+      inputFiles: [],
     };
     let validations = 0;
     const result = await executeAction(
@@ -244,7 +290,7 @@ test("bare durable markers cannot expose terminal-less result outputs", async ()
           workflow: path.join(root, "workflow.yaml"),
           sourceRoot: root,
           executionRoot: root,
-          attachments: [],
+          namedInputs: [],
           maximumParallel: "1",
         }),
         allocate: async () => allocation,
@@ -303,6 +349,7 @@ test("authenticated terminal-less recovery retains and validates its result", as
       parent: root,
       runDirectory,
       terminalPath: path.join(root, ".terminal.json"),
+      inputFiles: [],
     };
     let validations = 0;
     const result = await executeAction(
@@ -318,7 +365,7 @@ test("authenticated terminal-less recovery retains and validates its result", as
           workflow: path.join(root, "workflow.yaml"),
           sourceRoot: root,
           executionRoot: root,
-          attachments: [],
+          namedInputs: [],
           maximumParallel: "1",
         }),
         allocate: async () => allocation,
@@ -407,3 +454,160 @@ test("adapter-authored failure is a stable structured fact", () => {
     assert.equal(error.message.toLowerCase().includes(prohibited), false);
   }
 });
+
+for (const signal of ["SIGINT", "SIGTERM"] as const) {
+  for (const phase of [
+    "allocation",
+    "terminal",
+    "recovery",
+    "projection",
+    "cleanup",
+  ] as const) {
+    test(
+      `cancellation during ${phase} cleans private inputs (${signal})`,
+      { timeout: 5000 },
+      async () => {
+        const root = await mkdtemp(
+          path.join(os.tmpdir(), "scherzo-main-cancel-"),
+        );
+        const before = [
+          process.listenerCount("SIGINT"),
+          process.listenerCount("SIGTERM"),
+        ];
+        let allocated: ExecutionAllocation | undefined;
+        let cleanups = 0;
+        let launches = 0;
+        const cleaned = Promise.withResolvers<void>();
+        const inputs: ActionInputs = {
+          workspace: root,
+          workflow: path.join(root, "workflow.yaml"),
+          sourceRoot: root,
+          executionRoot: root,
+          maximumParallel: "1",
+          namedInputs: [
+            {
+              name: "request",
+              kind: "json",
+              source: { kind: "inline", value: '{ "private": true }' },
+            },
+            {
+              name: "text",
+              kind: "text",
+              source: { kind: "inline", value: "private text" },
+            },
+          ],
+        };
+        const interrupt = async () => {
+          process.emit(signal);
+          // Prove cleanup does not wait for blocked post-run processing to return.
+          await cleaned.promise;
+        };
+        try {
+          const result = await executeAction(
+            { RUNNER_TEMP: root },
+            {
+              bootstrap: async () => ({
+                executable: "/verified/cli",
+                cliDirectory: "/verified",
+                environment: {},
+              }),
+              readInputs: async () => inputs,
+              allocate: async (temp, named) => {
+                allocated = await allocateExecution(temp, named);
+                if (phase === "allocation") process.emit(signal);
+                return allocated;
+              },
+              execute: async (_exe, _inputs, allocation) => {
+                launches += 1;
+                await mkdir(
+                  path.join(allocation.runDirectory, "attempts/000001/result"),
+                  { recursive: true },
+                );
+                await writeFile(
+                  path.join(
+                    allocation.runDirectory,
+                    "attempts/000001/result/result.json",
+                  ),
+                  "{}\n",
+                );
+                return {
+                  code: 0,
+                  signal: null,
+                  terminalPath: allocation.terminalPath,
+                  terminalBytes: 2,
+                  terminalOverflow: false,
+                };
+              },
+              readTerminal: async () => {
+                if (phase === "terminal") await interrupt();
+                if (phase === "recovery")
+                  throw new AdapterError("terminal_result_invalid");
+                assert.ok(allocated);
+                return {
+                  schemaVersion: 1,
+                  command: "scherzo-cloud workflow run",
+                  outcome: "succeeded",
+                  exitStatus: 0,
+                  runDirectory: allocated.runDirectory,
+                  attemptNumber: 1,
+                  resultDirectory: path.join(
+                    allocated.runDirectory,
+                    "attempts/000001/result",
+                  ),
+                  rootKeys: new Set([
+                    "schemaVersion",
+                    "command",
+                    "outcome",
+                    "exitStatus",
+                    "runDirectory",
+                    "attemptNumber",
+                    "resultDirectory",
+                    "result",
+                  ]),
+                };
+              },
+              recover: async () => {
+                if (phase === "recovery") await interrupt();
+                return undefined;
+              },
+              project: async () => {
+                if (phase === "projection") await interrupt();
+                return { outcome: "succeeded" };
+              },
+              writeOutputs: async () => undefined,
+              cleanup: async (allocation) => {
+                cleanups += 1;
+                if (phase === "cleanup") process.emit(signal);
+                await cleanupExecution(allocation);
+                cleaned.resolve();
+              },
+            },
+          );
+          assert.ok(result.failure);
+          assert.equal(cleanups, 1);
+          assert.ok(allocated);
+          for (const input of allocated.inputFiles)
+            await assert.rejects(access(input.path));
+          await assert.rejects(access(allocated.terminalPath));
+          if (phase === "allocation") {
+            assert.equal(launches, 0);
+            await assert.rejects(access(allocated.parent));
+          } else {
+            await access(
+              path.join(
+                allocated.runDirectory,
+                "attempts/000001/result/result.json",
+              ),
+            );
+          }
+          assert.deepEqual(
+            [process.listenerCount("SIGINT"), process.listenerCount("SIGTERM")],
+            before,
+          );
+        } finally {
+          await rm(root, { recursive: true, force: true });
+        }
+      },
+    );
+  }
+}

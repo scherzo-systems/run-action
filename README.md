@@ -94,21 +94,19 @@ steps:
       printf 'workflow outcome: %s\n' "$WORKFLOW_OUTCOME"
 ```
 
-For a useful agent example, start with
-[resolve a PR's merge conflicts](examples/resolve-pr-conflicts/README.md): comment
-`/resolve-conflicts`, let an agent resolve the merge and run your checks, then publish
-from an isolated job. The example supplies the helper code; customize the checks and
-repair instructions. The example pins a verified Action revision embedding CLI
-v0.32.0, including the conditional-skip fix.
-
-The advanced [nightly Sentry repair composition](examples/nightly-sentry-repair/README.md)
+The source tree also contains a working
+[PR conflict resolver](examples/resolve-pr-conflicts/README.md) and advanced
+[nightly Sentry repair composition](examples/nightly-sentry-repair/README.md). The latter
 adds agent-produced JSON discovery, a bounded GitHub matrix, and publisher
-failure-isolation verification. Agent examples require harness setup and provider
-credentials.
+failure-isolation verification. Both executable examples retain the fixed acquisition
+forms and harness versions accepted by their checked-in immutable Action mirrors.
 
-V1 provides no moving `v1`, `latest`, or semantic-version tag. Do not replace the SHA in
-these examples with `main`, another branch or tag, an abbreviated value, or a Scherzo
-Cloud monorepo commit.
+Each example README separately stages its v0.36.0 named `request` workflow and the exact
+paired reference, acquisition, and harness updates for the later named-mirror revision.
+Do not apply only part of a staged recipe or select a named workflow with an older fixed-
+input Action. V1 provides no moving `v1`, `latest`, or semantic-version tag; do not
+improvise with `main`, another branch or tag, an abbreviation, a placeholder, or a
+Scherzo Cloud monorepo commit.
 
 ## Inputs
 
@@ -117,22 +115,47 @@ Cloud monorepo commit.
 | `workflow` | required | Workflow file to run. Relative paths resolve from `GITHUB_WORKSPACE`. |
 | `source-root` | `GITHUB_WORKSPACE` | Complete source boundary containing the workflow and its static files. |
 | `execution-root` | `GITHUB_WORKSPACE` | Existing caller-owned directory in which commands and agents run. |
-| `prompt` | absent | Inline UTF-8 value supplied as `imports.prompt`. |
-| `prompt-file` | absent | File whose exact bytes are supplied as `imports.prompt`. Conflicts with `prompt`. |
-| `attachments` | absent | Ordered `media-type=path` pairs, one per line. |
+| `inputs` | absent | Closed JSON acquisition map for named Text, JSON, File, and attachment-collection values. |
 | `max-parallel` | `1` | Maximum number of workflow nodes to run concurrently, from 1 through 256. |
 | `export` | absent | Exact declared workflow export to bridge to selected-export outputs. |
 
-Attachment input uses this line-oriented form:
+Absent or empty `inputs`, and the document `{}`, all supply the empty named map. A
+nonempty value is one JSON object keyed by declared Workflow V1 input names. Each member
+uses exactly one closed form:
 
-```text
-application/json=issue.json
-image/png=screenshot.png
+```json
+{
+  "instructions": { "kind": "text", "value": "exact inline text" },
+  "request": { "kind": "json", "path": "request.json" },
+  "bundle": {
+    "kind": "file",
+    "mediaType": "application/zip",
+    "path": "bundle.zip"
+  },
+  "evidence": {
+    "kind": "attachments",
+    "items": [
+      { "mediaType": "text/plain", "path": "notes.txt" },
+      { "mediaType": "image/png", "path": "screenshot.png" }
+    ]
+  },
+  "optionalEvidence": { "kind": "attachments", "items": [] }
+}
 ```
 
-Relative workflow, source, execution, prompt-file, and attachment paths all resolve from
-`GITHUB_WORKSPACE`. The Action does not infer a repository or workflow-directory
-boundary.
+Text and JSON each accept either `value` or a nonempty `path`. JSON `value` may be any
+JSON value, including `null`; inline Text may be empty. File requires a nonempty
+`mediaType` and `path`. Attachment items retain their array order, while an empty array
+supplies a present empty collection. Unknown fields, duplicate members, unknown kinds,
+and mixed value/path forms are rejected.
+
+Every relative workflow, source, execution, and acquisition path resolves from
+`GITHUB_WORKSPACE`. A path equal to `-` means the ordinary workspace file named `-`, not
+standard input. Inline Text and exact lexical inline JSON bytes travel through temporary
+owner-private files and never through argv or stdin; those files are removed after the
+CLI stops. The Action visits names in unsigned UTF-8 order and leaves kind, interface,
+media-type, schema, and acquisition bounds to the pinned CLI. It does not infer a
+repository or workflow-directory boundary.
 
 ## Outputs
 

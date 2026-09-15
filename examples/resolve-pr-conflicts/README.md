@@ -3,11 +3,10 @@
 Comment `/resolve-conflicts` on a pull request. Codex resolves the merge, Scherzo
 runs your checks, and a separate job pushes one merge commit back to the PR.
 
-This example pins a verified Run Action revision embedding CLI v0.32.0.
-
-The bundled Action's no-conflict path has passed with the published CLI v0.32.0
-and Codex 0.153.4, without model credentials. A live GitHub/model trial remains
-outstanding.
+This executable example pins verified public mirror
+`3926e264752beb8702618f2969fcece5f011d5c2`, its fixed `prompt` interface, CLI v0.32.0,
+and qualified Codex 0.153.4. Its no-conflict path has passed without model credentials. A
+live GitHub/model trial remains outstanding.
 
 GitHub.com only; open, same-repository PRs and commenters with write access.
 
@@ -44,9 +43,9 @@ prepare merge → resolve only if conflicted → run checks → export Git bundl
 authorize → resolve → publish
 ```
 
-Authorization passes one PR snapshot through the Run Action's `prompt` input.
-The Scherzo preparation command verifies the checkout, locates the base commit,
-configures the Git author, and starts the merge only if it conflicts. Its declared
+Authorization passes one PR snapshot through the Run Action's `prompt` input. The
+Scherzo preparation command verifies the checkout, locates the base commit, configures
+the Git author, and starts the merge only if it conflicts. Its declared
 text output gates the agent. No conflicts means a successful workflow with the
 agent and checks skipped and no bundle to publish. GitHub still installs and
 authenticates Codex before invoking Scherzo; a no-op makes no model request.
@@ -61,6 +60,25 @@ GitHub's actions use readable version tags. Only the Scherzo Run Action keeps it
 SHA, since it has no version tags yet. Codex stays at `0.153.4`, the qualified
 version for CLI v0.32.0 (`>=0.147.0 <0.154.0`); check compatibility before upgrading
 either pin. Version tags can move, unlike immutable commit SHAs.
+
+## Named-input successor staging
+
+The separately valid
+[staged resolver workflow](.scherzo/staged-named-inputs/resolve-pr-conflicts.yaml) records
+the v0.36.0 named Text target without changing the working fixed-input example. Activate
+it only after the first named-input Action mirror passes its public checks. In the later
+reference-update revision, replace the active Scherzo workflow with the staged file,
+replace the Run Action `uses:` value with that verified full mirror SHA, and replace the
+`prompt` field with:
+
+```yaml
+inputs: >-
+  {"request":{"kind":"text","value":${{ toJSON(needs.authorize.outputs.pr) }}}}
+```
+
+CLI v0.36.0 retains the same admitted Codex range and qualified 0.153.4 release. Do not
+publish or use a revision in which only the reference, acquisition form, or Scherzo
+workflow has changed.
 
 ## Why the separate publisher?
 

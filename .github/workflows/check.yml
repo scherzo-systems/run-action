@@ -62,12 +62,59 @@ jobs:
           mkdir -p "$fixture_root" "$decoy_root"
           cat >"$fixture_root/success.yml" <<'YAML'
           schemaVersion: 1
+          inputs:
+            emptyText:
+              kind: text
+            pathText:
+              kind: text
+            inlineJson:
+              kind: json
+            pathJson:
+              kind: json
+            emptyFile:
+              kind: file
+              mediaType: application/octet-stream
+            orderedItems:
+              kind: attachments
+            emptyItems:
+              kind: attachments
           steps:
             succeed:
               kind: cmd
+              inputs:
+                emptyText:
+                  ref: inputs.emptyText
+                pathText:
+                  ref: inputs.pathText
+                inlineJson:
+                  ref: inputs.inlineJson
+                pathJson:
+                  ref: inputs.pathJson
+                emptyFile:
+                  ref: inputs.emptyFile
+                orderedItems:
+                  ref: inputs.orderedItems
+                emptyItems:
+                  ref: inputs.emptyItems
               command:
-                argv: ["bash", "-c", "printf 'native behavior passed\\n'"]
+                argv:
+                  - bash
+                  - -c
+                  - |
+                    set -euo pipefail
+                    test ! -s "$SCHERZO_STEP_INPUTS/values/emptyText"
+                    test "$(cat "$SCHERZO_STEP_INPUTS/values/pathText")" = native-behavior
+                    test "$(cat "$SCHERZO_STEP_INPUTS/values/inlineJson")" = null
+                    test "$(cat "$SCHERZO_STEP_INPUTS/values/pathJson")" = '{"ok":true}'
+                    test ! -s "$SCHERZO_STEP_INPUTS/values/emptyFile"
+                    test "$(find "$SCHERZO_STEP_INPUTS/collections/orderedItems" -type f | wc -l | tr -d ' ')" = 2
+                    test "$(find "$SCHERZO_STEP_INPUTS/collections/emptyItems" -type f | wc -l | tr -d ' ')" = 0
           YAML
+          printf 'native-behavior\n' >"$fixture_root/text.txt"
+          printf '{"ok":true}\n' >"$fixture_root/value.json"
+          : >"$fixture_root/empty.bin"
+          printf 'first\n' >"$fixture_root/first.txt"
+          printf 'second\n' >"$fixture_root/second.txt"
           cat >"$fixture_root/failure.yml" <<'YAML'
           schemaVersion: 1
           steps:
@@ -90,6 +137,8 @@ jobs:
           workflow: ${{ runner.temp }}/run-action-live/success.yml
           source-root: ${{ runner.temp }}/run-action-live
           execution-root: ${{ runner.temp }}/run-action-live
+          inputs: >-
+            {"pathText":{"kind":"text","path":"${{ runner.temp }}/run-action-live/text.txt"},"emptyText":{"kind":"text","value":""},"pathJson":{"kind":"json","path":"${{ runner.temp }}/run-action-live/value.json"},"inlineJson":{"kind":"json","value":null},"emptyFile":{"kind":"file","mediaType":"application/octet-stream","path":"${{ runner.temp }}/run-action-live/empty.bin"},"orderedItems":{"kind":"attachments","items":[{"mediaType":"text/plain","path":"${{ runner.temp }}/run-action-live/first.txt"},{"mediaType":"text/plain","path":"${{ runner.temp }}/run-action-live/second.txt"}]},"emptyItems":{"kind":"attachments","items":[]}}
       - name: Verify successful retained result and CLI path
         shell: bash
         env:
@@ -106,12 +155,12 @@ jobs:
           test "$(command -v scherzo-cloud)" != "$RUNNER_TEMP/run-action-decoy/scherzo-cloud"
           scherzo-cloud version --json >"$RUNNER_TEMP/verified-version.json"
           test -s "$RUNNER_TEMP/verified-version.json"
-      - name: Validate example DAGs with the installed release
+      - name: Validate staged named-input DAGs with the installed release
         shell: bash
         run: |
           set -euo pipefail
           for example in resolve-pr-conflicts nightly-sentry-repair; do
-            for workflow in examples/"$example"/.scherzo/workflows/*.yaml; do
+            for workflow in examples/"$example"/.scherzo/staged-named-inputs/*.yaml; do
               scherzo-cloud workflow validate --json \
                 --source-root "examples/$example/.scherzo" "$workflow"
             done

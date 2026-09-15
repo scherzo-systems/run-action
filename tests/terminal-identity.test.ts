@@ -33,6 +33,7 @@ test("published terminal envelope recovers only the reserved committed identity"
       parent: directory,
       runDirectory: path.join(directory, "run"),
       terminalPath: path.join(directory, "terminal.json"),
+      inputFiles: [],
     };
     const artifactDirectory = path.join(
       allocation.runDirectory,
@@ -123,6 +124,7 @@ test("bare durable markers do not authenticate terminal-less recovery", async ()
       parent: directory,
       runDirectory: path.join(directory, "run"),
       terminalPath: path.join(directory, "terminal.json"),
+      inputFiles: [],
     };
     await mkdir(allocation.runDirectory);
     await writeFile(path.join(allocation.runDirectory, "run.json"), "{}\n");
@@ -169,6 +171,7 @@ test("pinned status binds terminal-less recovery to the initial published result
       parent: directory,
       runDirectory: path.join(directory, "run"),
       terminalPath: path.join(directory, "terminal.json"),
+      inputFiles: [],
     };
     const artifactDirectory = path.join(
       allocation.runDirectory,

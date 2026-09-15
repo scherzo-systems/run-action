@@ -168,6 +168,7 @@ test("nightly composition keeps setup, bounded repair, and publication caller-ow
   assert.deepEqual(Object.keys(repair.env ?? {}), ["OPENAI_API_KEY"]);
   assert.equal(repair.with?.export, "changes");
   assert.equal(repair.with?.prompt, "${{ toJSON(matrix.issue) }}");
+  assert.equal(repair.with?.inputs, undefined);
 
   const checkout = repairJob.steps[0];
   assert.ok(checkout);
@@ -183,10 +184,17 @@ test("nightly composition keeps setup, bounded repair, and publication caller-ow
   );
   assert.match(gitAuthor.run ?? "", /git config --local user\.name/u);
   assert.match(gitAuthor.run ?? "", /git config --local user\.email/u);
-  assert.match(
-    stepByName(repairJob, "Install the caller-selected Pi harness").run ?? "",
-    /@earendil-works\/pi-coding-agent@0\.83\.0/u,
+  for (const job of [workflow.jobs.discover, repairJob]) {
+    assert.match(
+      stepByName(job, "Install the caller-selected Pi harness").run ?? "",
+      /@earendil-works\/pi-coding-agent@0\.83\.0/u,
+    );
+  }
+  const exampleReadme = await readFile(
+    path.join(packageRoot, "examples/nightly-sentry-repair/README.md"),
+    "utf8",
   );
+  assert.match(exampleReadme, /@earendil-works\/pi-coding-agent@0\.85\.1/u);
 
   const sameJob = stepByName(
     repairJob,
@@ -282,7 +290,7 @@ test("nightly composition keeps setup, bounded repair, and publication caller-ow
   );
 });
 
-test("Sentry workflows use semantic JSON and Git outputs", async () => {
+test("Sentry working and staged workflows preserve their paired contracts", async () => {
   const discovery = parse(
     await readFile(
       path.join(
@@ -340,15 +348,8 @@ test("Sentry workflows use semantic JSON and Git outputs", async () => {
   };
   assert.equal(matrixSchema.properties.include.maxItems, 10);
 
-  const repair = parse(
-    await readFile(
-      path.join(
-        packageRoot,
-        "examples/nightly-sentry-repair/.scherzo/workflows/repair-sentry-issue.yaml",
-      ),
-      "utf8",
-    ),
-  ) as {
+  type RepairWorkflow = {
+    inputs?: Record<string, { kind: string }>;
     agentProfiles: Record<
       string,
       {
@@ -360,19 +361,69 @@ test("Sentry workflows use semantic JSON and Git outputs", async () => {
     >;
     steps: Record<
       string,
-      { outputs: Record<string, { kind: string; from: string }> }
+      {
+        agent?: {
+          message: {
+            text: { ref?: string }[];
+            attachments?: { ref: string }[];
+          };
+        };
+        outputs?: Record<string, { kind: string; from: string }>;
+      }
     >;
     exports: Record<string, { ref: string }>;
   };
+  const repair = parse(
+    await readFile(
+      path.join(
+        packageRoot,
+        "examples/nightly-sentry-repair/.scherzo/workflows/repair-sentry-issue.yaml",
+      ),
+      "utf8",
+    ),
+  ) as RepairWorkflow;
+  assert.equal(repair.inputs, undefined);
   assert.deepEqual(repair.agentProfiles.repair?.harness, {
     kind: "pi",
     config: { model: "openai/gpt-5.4-mini", thinking: "high" },
   });
-  assert.deepEqual(repair.steps.repair?.outputs.changes, {
+  assert.equal(
+    repair.steps.repair?.agent?.message.text.at(-1)?.ref,
+    "imports.prompt",
+  );
+  assert.deepEqual(repair.steps.repair?.outputs?.changes, {
     kind: "git_branch",
     from: "workspace",
   });
   assert.deepEqual(repair.exports.changes, {
+    ref: "outputs.repair.changes",
+  });
+
+  const stagedSource = await readFile(
+    path.join(
+      packageRoot,
+      "examples/nightly-sentry-repair/.scherzo/staged-named-inputs/repair-sentry-issue.yaml",
+    ),
+    "utf8",
+  );
+  const staged = parse(stagedSource) as RepairWorkflow;
+  assert.deepEqual(staged.inputs?.request, { kind: "json" });
+  assert.deepEqual(Object.keys(staged.steps), ["repair"]);
+  assert.deepEqual(staged.steps.repair?.agent?.message.attachments, [
+    { ref: "inputs.request" },
+  ]);
+  assert.equal(
+    staged.steps.repair?.agent?.message.text.some(
+      ({ ref }) => ref === "inputs.request",
+    ),
+    false,
+  );
+  assert.equal(stagedSource.includes(".scherzo-sentry-request"), false);
+  assert.deepEqual(staged.steps.repair?.outputs?.changes, {
+    kind: "git_branch",
+    from: "workspace",
+  });
+  assert.deepEqual(staged.exports.changes, {
     ref: "outputs.repair.changes",
   });
 });

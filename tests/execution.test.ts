@@ -42,10 +42,45 @@ function inputs(workspace: string): ActionInputs {
     workflow: path.join(workspace, "workflow.yaml"),
     sourceRoot: workspace,
     executionRoot: workspace,
-    prompt: "private prompt\r\n",
-    attachments: [
-      { mediaType: "image/png", path: path.join(workspace, "one.png") },
-      { mediaType: "image/png", path: path.join(workspace, "one.png") },
+    namedInputs: [
+      { name: "emptyItems", kind: "attachments", items: [] },
+      {
+        name: "fileValue",
+        kind: "file",
+        mediaType: "application/octet-stream",
+        path: path.join(workspace, "data.bin"),
+      },
+      {
+        name: "inlineJson",
+        kind: "json",
+        source: {
+          kind: "inline",
+          value: '[1.00e+2, {"escaped":"\\u0061"}]',
+        },
+      },
+      {
+        name: "inlineText",
+        kind: "text",
+        source: { kind: "inline", value: "private text\r\n" },
+      },
+      {
+        name: "orderedItems",
+        kind: "attachments",
+        items: [
+          { mediaType: "image/png", path: path.join(workspace, "one.png") },
+          { mediaType: "image/png", path: path.join(workspace, "one.png") },
+        ],
+      },
+      {
+        name: "pathJson",
+        kind: "json",
+        source: { kind: "path", path: path.join(workspace, "-") },
+      },
+      {
+        name: "pathText",
+        kind: "text",
+        source: { kind: "path", path: path.join(workspace, "notes.txt") },
+      },
     ],
     maximumParallel: "0007",
     selectedExport: "report",
@@ -70,13 +105,29 @@ test("one shell-free child drains streams, spools JSON, and forwards one signal"
     await mkdir(workspace);
     await mkdir(runnerTemp);
     const actionInputs = inputs(workspace);
-    const allocation = await allocateExecution(runnerTemp, actionInputs.prompt);
-    assert.equal(
-      await readFile(allocation.promptPath!, "utf8"),
-      actionInputs.prompt,
+    const allocation = await allocateExecution(
+      runnerTemp,
+      actionInputs.namedInputs,
     );
     assert.equal((await lstat(allocation.parent)).mode & 0o7777, 0o700);
-    assert.equal((await lstat(allocation.promptPath!)).mode & 0o7777, 0o600);
+    assert.deepEqual(
+      allocation.inputFiles.map(({ name, kind }) => ({ name, kind })),
+      [
+        { name: "inlineJson", kind: "json" },
+        { name: "inlineText", kind: "text" },
+      ],
+    );
+    assert.equal(
+      await readFile(allocation.inputFiles[0]!.path, "utf8"),
+      '[1.00e+2, {"escaped":"\\u0061"}]',
+    );
+    assert.equal(
+      await readFile(allocation.inputFiles[1]!.path, "utf8"),
+      "private text\r\n",
+    );
+    for (const input of allocation.inputFiles) {
+      assert.equal((await lstat(input.path)).mode & 0o7777, 0o600);
+    }
     await assert.rejects(access(allocation.runDirectory));
 
     const child = new FakeChild();
@@ -143,9 +194,60 @@ test("one shell-free child drains streams, spools JSON, and forwards one signal"
       `::stop-commands::scherzo_${"ef".repeat(32)}\n::set-output name=hostile::value\npresentation complete\n::scherzo_${"ef".repeat(32)}::\n`,
     );
     assert.equal(observed?.executable, "/verified/cli/scherzo-cloud");
+    const inlineJsonPath = allocation.inputFiles[0]!.path;
+    const inlineTextPath = allocation.inputFiles[1]!.path;
+    const expectedArguments = [
+      "workflow",
+      "run",
+      "--source-root",
+      workspace,
+      "--execution-root",
+      workspace,
+      "--run-dir",
+      allocation.runDirectory,
+      "--max-parallel",
+      "0007",
+      "--json",
+      "--input-attachments-empty",
+      "emptyItems",
+      "--input-file",
+      "fileValue",
+      "application/octet-stream",
+      path.join(workspace, "data.bin"),
+      "--input-json-file",
+      "inlineJson",
+      inlineJsonPath,
+      "--input-text-file",
+      "inlineText",
+      inlineTextPath,
+      "--input-attachment",
+      "orderedItems",
+      "image/png",
+      path.join(workspace, "one.png"),
+      "--input-attachment",
+      "orderedItems",
+      "image/png",
+      path.join(workspace, "one.png"),
+      "--input-json-file",
+      "pathJson",
+      path.join(workspace, "-"),
+      "--input-text-file",
+      "pathText",
+      path.join(workspace, "notes.txt"),
+      path.join(workspace, "workflow.yaml"),
+    ];
+    assert.deepEqual(observed?.arguments_, expectedArguments);
     assert.deepEqual(
-      observed?.arguments_,
       workflowArguments(actionInputs, allocation),
+      expectedArguments,
+    );
+    assert.equal(
+      expectedArguments.some((argument) => argument.includes("private text")),
+      false,
+    );
+    assert.equal(
+      expectedArguments.some((argument) => argument.includes("1.00e+2")),
+      false,
     );
     assert.equal(observed?.options.shell, false);
     assert.deepEqual(observed?.options.stdio, ["ignore", "pipe", "pipe"]);
@@ -158,12 +260,59 @@ test("one shell-free child drains streams, spools JSON, and forwards one signal"
     await mkdir(allocation.runDirectory);
     await writeFile(path.join(allocation.runDirectory, "durable"), "retained");
     await cleanupExecution(allocation);
-    await assert.rejects(access(allocation.promptPath!));
+    for (const input of allocation.inputFiles) {
+      await assert.rejects(access(input.path));
+    }
     await assert.rejects(access(allocation.terminalPath));
     assert.equal(
       await readFile(path.join(allocation.runDirectory, "durable"), "utf8"),
       "retained",
     );
+  });
+});
+
+test("cancellation during launch preparation reaches the child only once", async () => {
+  await withTemporary(async (directory) => {
+    const actionInputs = inputs(directory);
+    const allocation = await allocateExecution(
+      directory,
+      actionInputs.namedInputs,
+    );
+    const child = new FakeChild();
+    const signals = new EventEmitter();
+    const cancellation = new AbortController();
+    const presentationStream = new PassThrough();
+    presentationStream.resume();
+    const result = await runWorkflow(
+      "/verified/cli",
+      actionInputs,
+      allocation,
+      {},
+      {
+        spawn: () => {
+          // Cancellation reaches the Action before runWorkflow can register its
+          // child handlers. A later second signal must not duplicate forwarding.
+          cancellation.abort("SIGTERM");
+          queueMicrotask(() => {
+            signals.emit("SIGINT");
+            child.stdout.end();
+            child.stderr.end();
+            child.emit("close", null, "SIGTERM");
+          });
+          return child as never;
+        },
+        signals,
+        presentationStream,
+        randomBytes: () => Buffer.alloc(32, 0xef),
+        maximumTerminalBytes: 1024,
+      },
+      cancellation.signal,
+    );
+    assert.deepEqual(child.killedWith, ["SIGTERM"]);
+    assert.equal(result.signalForwarded, "SIGTERM");
+    signals.emit("SIGTERM");
+    assert.deepEqual(child.killedWith, ["SIGTERM"]);
+    await cleanupExecution(allocation);
   });
 });
 
@@ -174,7 +323,7 @@ test("a symlinked runner temp retains the CLI's normalized run identity", async 
     await mkdir(physicalTemp);
     await symlink(physicalTemp, runnerTemp, "dir");
 
-    const allocation = await allocateExecution(runnerTemp, undefined);
+    const allocation = await allocateExecution(runnerTemp, []);
 
     assert.equal(
       allocation.runDirectory,
@@ -190,7 +339,7 @@ test("an occupied reserved run path is rejected before child launch", async () =
     const runnerTemp = path.join(directory, "runner-temp");
     await mkdir(workspace);
     await mkdir(runnerTemp);
-    const allocation = await allocateExecution(runnerTemp, undefined);
+    const allocation = await allocateExecution(runnerTemp, []);
     await mkdir(allocation.runDirectory);
     let launches = 0;
     await assert.rejects(
@@ -222,7 +371,7 @@ test("terminal spool is bounded while stdout continues to EOF", async () => {
     const runnerTemp = path.join(directory, "runner-temp");
     await mkdir(workspace);
     await mkdir(runnerTemp);
-    const allocation = await allocateExecution(runnerTemp, undefined);
+    const allocation = await allocateExecution(runnerTemp, []);
     const child = new FakeChild();
     const signals = new EventEmitter();
     let markSpawned: (() => void) | undefined;
@@ -241,7 +390,7 @@ test("terminal spool is bounded while stdout continues to EOF", async () => {
     };
     const running = runWorkflow(
       "/verified/cli",
-      { ...inputs(workspace), prompt: undefined } as unknown as ActionInputs,
+      { ...inputs(workspace), namedInputs: [] },
       allocation,
       {},
       dependencies,

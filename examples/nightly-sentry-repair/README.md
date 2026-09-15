@@ -5,6 +5,11 @@ This example composes the Run Action with caller-owned GitHub Actions setup. Cop
 The workflow intentionally calls a repository-owned `scripts/publish-scherzo-branch`
 program that is not supplied by this Action.
 
+The checked-in executable workflow remains paired with public mirror
+`deb84786f26c01835c9d3590d3304125ed9d0273`, its fixed `prompt` interface, CLI v0.15.0,
+and qualified Pi 0.83.0. Do not combine that immutable Action with the staged named-input
+workflow described below.
+
 Before enabling the schedule, configure:
 
 - `OPENAI_API_KEY` for the model selected by the checked-in Pi profiles;
@@ -18,6 +23,37 @@ and bounds matrix concurrency at two. Replace the example author name and email 
 identity selected by caller policy. Discovery is an agent step whose declared
 `agent_result` is the compact JSON matrix. Each matrix job invokes one repair workflow and
 asks the Action to retain the `changes` export as `git_branch`.
+
+## Named-input successor staging
+
+The separately valid
+[staged repair workflow](.scherzo/staged-named-inputs/repair-sentry-issue.yaml) records the
+v0.36.0 target without breaking the executable fixed-input example. It declares JSON
+`request` and supplies that value directly as an `application/json` agent attachment, so
+it creates no request copy in the caller workspace and has no workflow-owned request file
+to clean after success, failure, or cancellation.
+
+Activate the staged form only in the later reference-update revision, after the first
+named-input Action mirror has passed its public checks. In that one revision:
+
+1. replace both Run Action `uses:` values with that verified full mirror SHA;
+2. replace `.scherzo/workflows/repair-sentry-issue.yaml` with the staged workflow;
+3. replace `prompt: ${{ toJSON(matrix.issue) }}` with:
+
+   ```yaml
+   inputs: >-
+     {"request":{"kind":"json","value":${{ toJSON(matrix.issue) }}}}
+   ```
+
+4. change **both** Pi installation steps to the v0.36.0 qualification release:
+
+   ```sh
+   npm install --global @earendil-works/pi-coding-agent@0.85.1
+   ```
+
+CLI v0.36.0 admits Pi `>=0.84.2 <0.86.0`; Pi 0.85.1 is the independently qualified
+version. Do not update only the Action reference, acquisition form, staged workflow, or
+harness pin. The publication runbook requires this paired revision to pass before use.
 
 Action output paths remain local to the repair runner. The caller copies the complete,
 already-validated Artifact Set into a private GitHub Actions artifact with one-day

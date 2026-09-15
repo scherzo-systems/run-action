@@ -12,14 +12,8 @@ inputs:
     description: Existing caller-owned execution directory.
     required: false
     default: ${{ github.workspace }}
-  prompt:
-    description: Inline UTF-8 imports.prompt value.
-    required: false
-  prompt-file:
-    description: File containing exact imports.prompt bytes.
-    required: false
-  attachments:
-    description: Ordered media-type and path pairs, one per line.
+  inputs:
+    description: Closed JSON acquisition map for named workflow inputs.
     required: false
   max-parallel:
     description: Maximum parallel workflow nodes.

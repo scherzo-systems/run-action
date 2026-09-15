@@ -3201,121 +3201,121 @@ var WorkflowCommandGuard = class {
 var release_evidence_default = {
   schemaVersion: 1,
   repository: "scherzo-systems/scherzo-cloud-cli",
-  releaseUrl: "https://github.com/scherzo-systems/scherzo-cloud-cli/releases/tag/v0.32.0",
-  tag: "v0.32.0",
-  releaseId: 386748412,
-  releaseCommit: "70cda5707c419de3912769f4adeba6805af7c2c6",
-  sourceRevision: "8850664b080784c826a410e770092e452a6bd9b7",
-  requiredSourceAncestor: "d3abe478b006861330b8998cb8ccfefe28cf7958",
-  version: "0.32.0",
-  buildIdentity: "8850664b080784c826a410e770092e452a6bd9b7",
+  releaseUrl: "https://github.com/scherzo-systems/scherzo-cloud-cli/releases/tag/v0.36.0",
+  tag: "v0.36.0",
+  releaseId: 388669851,
+  releaseCommit: "f665784fccddee8be91d0d12f43b165089dda438",
+  sourceRevision: "7da44756c2f611f39c47ee28a697c01f8afe7a6e",
+  requiredSourceAncestor: "7215869ca26439d305c097af1dca50ebb8066419",
+  version: "0.36.0",
+  buildIdentity: "7da44756c2f611f39c47ee28a697c01f8afe7a6e",
   checksumAsset: {
-    id: 556305548,
+    id: 564106171,
     name: "SHA256SUMS",
     size: 354,
-    sha256: "5189a1e1624074d3be345770d9717ab7d605dea2446b49fbd76b7a2cbbef31c5",
-    url: "https://github.com/scherzo-systems/scherzo-cloud-cli/releases/download/v0.32.0/SHA256SUMS"
+    sha256: "b1cd0eb17d23e8a51861f208b714b6fddae21ac6fd061147b789a1594b022fd2",
+    url: "https://github.com/scherzo-systems/scherzo-cloud-cli/releases/download/v0.36.0/SHA256SUMS"
   },
   archives: {
     "x86_64-unknown-linux-gnu": {
-      id: 556305547,
-      name: "scherzo-cloud-0.32.0-x86_64-unknown-linux-gnu.tar.gz",
-      size: 11399162,
-      sha256: "1b2d873aa50487cb9e283a56b9ed62e2b02e5082ab313b05983452df63001e12",
-      url: "https://github.com/scherzo-systems/scherzo-cloud-cli/releases/download/v0.32.0/scherzo-cloud-0.32.0-x86_64-unknown-linux-gnu.tar.gz",
-      rootDirectory: "scherzo-cloud-0.32.0-x86_64-unknown-linux-gnu",
+      id: 564106172,
+      name: "scherzo-cloud-0.36.0-x86_64-unknown-linux-gnu.tar.gz",
+      size: 11851127,
+      sha256: "66cac4647491087297b81a346c9469558d68f22393a2a033ab0d87981dbba96b",
+      url: "https://github.com/scherzo-systems/scherzo-cloud-cli/releases/download/v0.36.0/scherzo-cloud-0.36.0-x86_64-unknown-linux-gnu.tar.gz",
+      rootDirectory: "scherzo-cloud-0.36.0-x86_64-unknown-linux-gnu",
       inventory: [
         {
-          path: "scherzo-cloud-0.32.0-x86_64-unknown-linux-gnu",
+          path: "scherzo-cloud-0.36.0-x86_64-unknown-linux-gnu",
           type: "directory",
           mode: 493,
           size: 0
         },
         {
-          path: "scherzo-cloud-0.32.0-x86_64-unknown-linux-gnu/LICENSE",
+          path: "scherzo-cloud-0.36.0-x86_64-unknown-linux-gnu/LICENSE",
           type: "file",
           mode: 420,
           size: 11357
         },
         {
-          path: "scherzo-cloud-0.32.0-x86_64-unknown-linux-gnu/README.md",
+          path: "scherzo-cloud-0.36.0-x86_64-unknown-linux-gnu/README.md",
           type: "file",
           mode: 420,
-          size: 73739
+          size: 77222
         },
         {
-          path: "scherzo-cloud-0.32.0-x86_64-unknown-linux-gnu/scherzo-cloud",
+          path: "scherzo-cloud-0.36.0-x86_64-unknown-linux-gnu/scherzo-cloud",
           type: "file",
           mode: 493,
-          size: 38267184
+          size: 40025376
         }
       ]
     },
     "aarch64-unknown-linux-gnu": {
-      id: 556305545,
-      name: "scherzo-cloud-0.32.0-aarch64-unknown-linux-gnu.tar.gz",
-      size: 11680652,
-      sha256: "081ce9df233de3531768d8f2b29babf5ad0af09fde97d72e0e0b2e86c0c2f0d4",
-      url: "https://github.com/scherzo-systems/scherzo-cloud-cli/releases/download/v0.32.0/scherzo-cloud-0.32.0-aarch64-unknown-linux-gnu.tar.gz",
-      rootDirectory: "scherzo-cloud-0.32.0-aarch64-unknown-linux-gnu",
+      id: 564106176,
+      name: "scherzo-cloud-0.36.0-aarch64-unknown-linux-gnu.tar.gz",
+      size: 12192345,
+      sha256: "9af8d51c7551063c4ee3c3c7f326905477c00cd7d7598b15e1479c260dff3a14",
+      url: "https://github.com/scherzo-systems/scherzo-cloud-cli/releases/download/v0.36.0/scherzo-cloud-0.36.0-aarch64-unknown-linux-gnu.tar.gz",
+      rootDirectory: "scherzo-cloud-0.36.0-aarch64-unknown-linux-gnu",
       inventory: [
         {
-          path: "scherzo-cloud-0.32.0-aarch64-unknown-linux-gnu",
+          path: "scherzo-cloud-0.36.0-aarch64-unknown-linux-gnu",
           type: "directory",
           mode: 493,
           size: 0
         },
         {
-          path: "scherzo-cloud-0.32.0-aarch64-unknown-linux-gnu/LICENSE",
+          path: "scherzo-cloud-0.36.0-aarch64-unknown-linux-gnu/LICENSE",
           type: "file",
           mode: 420,
           size: 11357
         },
         {
-          path: "scherzo-cloud-0.32.0-aarch64-unknown-linux-gnu/README.md",
+          path: "scherzo-cloud-0.36.0-aarch64-unknown-linux-gnu/README.md",
           type: "file",
           mode: 420,
-          size: 73739
+          size: 77222
         },
         {
-          path: "scherzo-cloud-0.32.0-aarch64-unknown-linux-gnu/scherzo-cloud",
+          path: "scherzo-cloud-0.36.0-aarch64-unknown-linux-gnu/scherzo-cloud",
           type: "file",
           mode: 493,
-          size: 36607e3
+          size: 38264632
         }
       ]
     },
     "aarch64-apple-darwin": {
-      id: 556305531,
-      name: "scherzo-cloud-0.32.0-aarch64-apple-darwin.tar.gz",
-      size: 10468837,
-      sha256: "e11aad4bc5aabe1ba5c47dd6de55097eb6f4bad68a679be8ad1a77b53f322455",
-      url: "https://github.com/scherzo-systems/scherzo-cloud-cli/releases/download/v0.32.0/scherzo-cloud-0.32.0-aarch64-apple-darwin.tar.gz",
-      rootDirectory: "scherzo-cloud-0.32.0-aarch64-apple-darwin",
+      id: 564106175,
+      name: "scherzo-cloud-0.36.0-aarch64-apple-darwin.tar.gz",
+      size: 10923729,
+      sha256: "0ff4a7e0382a4e31d7f935d0ebae511e2ac799b9023a0ee5d1574c15406a8771",
+      url: "https://github.com/scherzo-systems/scherzo-cloud-cli/releases/download/v0.36.0/scherzo-cloud-0.36.0-aarch64-apple-darwin.tar.gz",
+      rootDirectory: "scherzo-cloud-0.36.0-aarch64-apple-darwin",
       inventory: [
         {
-          path: "scherzo-cloud-0.32.0-aarch64-apple-darwin",
+          path: "scherzo-cloud-0.36.0-aarch64-apple-darwin",
           type: "directory",
           mode: 493,
           size: 0
         },
         {
-          path: "scherzo-cloud-0.32.0-aarch64-apple-darwin/LICENSE",
+          path: "scherzo-cloud-0.36.0-aarch64-apple-darwin/LICENSE",
           type: "file",
           mode: 420,
           size: 11357
         },
         {
-          path: "scherzo-cloud-0.32.0-aarch64-apple-darwin/README.md",
+          path: "scherzo-cloud-0.36.0-aarch64-apple-darwin/README.md",
           type: "file",
           mode: 420,
-          size: 73739
+          size: 77222
         },
         {
-          path: "scherzo-cloud-0.32.0-aarch64-apple-darwin/scherzo-cloud",
+          path: "scherzo-cloud-0.36.0-aarch64-apple-darwin/scherzo-cloud",
           type: "file",
           mode: 493,
-          size: 32490976
+          size: 34111680
         }
       ]
     }
@@ -3658,7 +3658,7 @@ var DEFAULT_EXECUTION_DEPENDENCIES = {
   randomBytes: import_node_crypto3.randomBytes,
   maximumTerminalBytes: MAXIMUM_TERMINAL_JSON_BYTES
 };
-async function allocateExecution(runnerTemp, prompt) {
+async function allocateExecution(runnerTemp, namedInputs) {
   if (!runnerTemp || !import_node_path3.default.isAbsolute(runnerTemp)) {
     throw new AdapterError("input_invalid");
   }
@@ -3674,6 +3674,7 @@ async function allocateExecution(runnerTemp, prompt) {
   });
   const runDirectory = import_node_path3.default.join(parent, "run");
   const terminalPath = import_node_path3.default.join(parent, ".terminal.json");
+  const inputFiles = [];
   try {
     await (0, import_promises4.chmod)(parent, 448);
     const terminalHandle = await (0, import_promises4.open)(
@@ -3687,23 +3688,29 @@ async function allocateExecution(runnerTemp, prompt) {
       await terminalHandle.close();
     }
     await (0, import_promises4.chmod)(terminalPath, 384);
-    if (prompt === void 0) {
-      return { parent, runDirectory, terminalPath };
+    for (const [index, input] of namedInputs.entries()) {
+      if (input.kind !== "text" && input.kind !== "json" || input.source.kind !== "inline") {
+        continue;
+      }
+      const inputPath = import_node_path3.default.join(
+        parent,
+        `.input-${String(index).padStart(4, "0")}`
+      );
+      const handle = await (0, import_promises4.open)(
+        inputPath,
+        import_node_fs2.constants.O_CREAT | import_node_fs2.constants.O_EXCL | import_node_fs2.constants.O_WRONLY,
+        384
+      );
+      try {
+        await handle.writeFile(Buffer.from(input.source.value, "utf8"));
+        await handle.sync();
+      } finally {
+        await handle.close();
+      }
+      await (0, import_promises4.chmod)(inputPath, 384);
+      inputFiles.push({ name: input.name, kind: input.kind, path: inputPath });
     }
-    const promptPath = import_node_path3.default.join(parent, ".prompt");
-    const promptHandle = await (0, import_promises4.open)(
-      promptPath,
-      import_node_fs2.constants.O_CREAT | import_node_fs2.constants.O_EXCL | import_node_fs2.constants.O_WRONLY,
-      384
-    );
-    try {
-      await promptHandle.writeFile(Buffer.from(prompt, "utf8"));
-      await promptHandle.sync();
-    } finally {
-      await promptHandle.close();
-    }
-    await (0, import_promises4.chmod)(promptPath, 384);
-    return { parent, runDirectory, terminalPath, promptPath };
+    return { parent, runDirectory, terminalPath, inputFiles };
   } catch (error) {
     await (0, import_promises4.rm)(parent, { recursive: true, force: true }).catch(() => void 0);
     throw error instanceof AdapterError ? error : new AdapterError("allocation_failed");
@@ -3723,12 +3730,31 @@ function workflowArguments(inputs, allocation) {
     inputs.maximumParallel,
     "--json"
   ];
-  const promptPath = allocation.promptPath ?? inputs.promptFile;
-  if (promptPath !== void 0) {
-    arguments_.push("--prompt-file", promptPath);
-  }
-  for (const attachment of inputs.attachments) {
-    arguments_.push("--attachment", attachment.mediaType, attachment.path);
+  const privateFiles = new Map(
+    allocation.inputFiles.map((input) => [
+      `${input.kind}:${input.name}`,
+      input.path
+    ])
+  );
+  for (const input of inputs.namedInputs) {
+    if (input.kind === "text" || input.kind === "json") {
+      const inputPath = input.source.kind === "path" ? input.source.path : privateFiles.get(`${input.kind}:${input.name}`);
+      if (inputPath === void 0) throw new AdapterError("allocation_failed");
+      arguments_.push(`--input-${input.kind}-file`, input.name, inputPath);
+    } else if (input.kind === "file") {
+      arguments_.push("--input-file", input.name, input.mediaType, input.path);
+    } else if (input.items.length === 0) {
+      arguments_.push("--input-attachments-empty", input.name);
+    } else {
+      for (const item of input.items) {
+        arguments_.push(
+          "--input-attachment",
+          input.name,
+          item.mediaType,
+          item.path
+        );
+      }
+    }
   }
   arguments_.push(inputs.workflow);
   return arguments_;
@@ -3767,7 +3793,7 @@ async function spoolStdout(stdout, handle, maximumBytes) {
   if (writeFailed) throw new AdapterError("child_output_failed");
   return { bytes, overflow };
 }
-async function runWorkflow(executable, inputs, allocation, environment, dependencies = DEFAULT_EXECUTION_DEPENDENCIES) {
+async function runWorkflow(executable, inputs, allocation, environment, dependencies = DEFAULT_EXECUTION_DEPENDENCIES, cancellation) {
   const arguments_ = workflowArguments(inputs, allocation);
   if (await (0, import_promises4.lstat)(allocation.runDirectory).catch(() => void 0)) {
     throw new AdapterError("allocation_failed");
@@ -3824,6 +3850,12 @@ async function runWorkflow(executable, inputs, allocation, environment, dependen
   const onTerminate = forward("SIGTERM");
   dependencies.signals.on("SIGINT", onInterrupt);
   dependencies.signals.on("SIGTERM", onTerminate);
+  const onCancellation = () => {
+    if (cancellation?.reason === "SIGINT") onInterrupt();
+    else onTerminate();
+  };
+  cancellation?.addEventListener("abort", onCancellation);
+  if (cancellation?.aborted) onCancellation();
   const stderrPromise = (async () => {
     for await (const value of child.stderr) {
       await guard.write(Buffer.from(value));
@@ -3862,6 +3894,7 @@ async function runWorkflow(executable, inputs, allocation, environment, dependen
     active = false;
     dependencies.signals.off("SIGINT", onInterrupt);
     dependencies.signals.off("SIGTERM", onTerminate);
+    cancellation?.removeEventListener("abort", onCancellation);
     try {
       await guard.stop();
     } catch {
@@ -3871,8 +3904,8 @@ async function runWorkflow(executable, inputs, allocation, environment, dependen
 }
 async function cleanupExecution(allocation) {
   let failed = false;
-  if (allocation.promptPath !== void 0) {
-    await (0, import_promises4.rm)(allocation.promptPath, { force: true }).catch(() => {
+  for (const input of allocation.inputFiles) {
+    await (0, import_promises4.rm)(input.path, { force: true }).catch(() => {
       failed = true;
     });
   }
@@ -3886,9 +3919,11 @@ async function cleanupExecution(allocation) {
     });
     if (await (0, import_promises4.lstat)(allocation.parent).catch(() => void 0)) failed = true;
   } else {
-    if (allocation.promptPath !== void 0 && await (0, import_promises4.lstat)(allocation.promptPath).catch(() => void 0) || await (0, import_promises4.lstat)(allocation.terminalPath).catch(() => void 0)) {
-      failed = true;
+    for (const input of allocation.inputFiles) {
+      if (await (0, import_promises4.lstat)(input.path).catch(() => void 0)) failed = true;
     }
+    if (await (0, import_promises4.lstat)(allocation.terminalPath).catch(() => void 0))
+      failed = true;
   }
   if (failed) throw new AdapterError("cleanup_failed");
 }
@@ -4030,40 +4065,324 @@ async function committedIdentity(allocation, envelope) {
 // src/inputs.ts
 var import_promises6 = require("node:fs/promises");
 var import_node_path5 = __toESM(require("node:path"), 1);
+var AcquisitionDocumentParser = class {
+  #source;
+  #position = 0;
+  constructor(source) {
+    this.#source = source;
+  }
+  parse() {
+    this.#skipWhitespace();
+    const value = this.#parseValue();
+    this.#skipWhitespace();
+    if (this.#position !== this.#source.length) this.#invalid();
+    return value;
+  }
+  #invalid() {
+    throw new AdapterError("input_invalid");
+  }
+  #skipWhitespace() {
+    while (this.#position < this.#source.length && [" ", "	", "\r", "\n"].includes(this.#source[this.#position])) {
+      this.#position += 1;
+    }
+  }
+  #parseValue() {
+    const character = this.#source[this.#position];
+    if (character === '"') return this.#parseString();
+    if (character === "{") return this.#parseObject();
+    if (character === "[") return this.#parseArray();
+    if (character === "t") return this.#parseLiteral("true", "boolean");
+    if (character === "f") return this.#parseLiteral("false", "boolean");
+    if (character === "n") return this.#parseLiteral("null", "null");
+    if (character === "-" || character !== void 0 && /[0-9]/u.test(character)) {
+      return this.#parseNumber();
+    }
+    return this.#invalid();
+  }
+  #parseLiteral(literal, type) {
+    const start = this.#position;
+    if (!this.#source.startsWith(literal, start)) this.#invalid();
+    this.#position += literal.length;
+    return { type, start, end: this.#position };
+  }
+  #parseNumber() {
+    const start = this.#position;
+    if (this.#source[this.#position] === "-") this.#position += 1;
+    if (this.#source[this.#position] === "0") {
+      this.#position += 1;
+      if (/[0-9]/u.test(this.#source[this.#position] ?? "")) this.#invalid();
+    } else {
+      if (!/[1-9]/u.test(this.#source[this.#position] ?? "")) this.#invalid();
+      while (/[0-9]/u.test(this.#source[this.#position] ?? "")) {
+        this.#position += 1;
+      }
+    }
+    if (this.#source[this.#position] === ".") {
+      this.#position += 1;
+      if (!/[0-9]/u.test(this.#source[this.#position] ?? "")) this.#invalid();
+      while (/[0-9]/u.test(this.#source[this.#position] ?? "")) {
+        this.#position += 1;
+      }
+    }
+    if (["e", "E"].includes(this.#source[this.#position] ?? "")) {
+      this.#position += 1;
+      if (["+", "-"].includes(this.#source[this.#position] ?? "")) {
+        this.#position += 1;
+      }
+      if (!/[0-9]/u.test(this.#source[this.#position] ?? "")) this.#invalid();
+      while (/[0-9]/u.test(this.#source[this.#position] ?? "")) {
+        this.#position += 1;
+      }
+    }
+    return { type: "number", start, end: this.#position };
+  }
+  #parseHexEscape() {
+    const digits = this.#source.slice(this.#position, this.#position + 4);
+    if (!/^[0-9A-Fa-f]{4}$/u.test(digits)) this.#invalid();
+    this.#position += 4;
+    return Number.parseInt(digits, 16);
+  }
+  #parseString() {
+    const start = this.#position;
+    this.#position += 1;
+    let value = "";
+    while (this.#position < this.#source.length) {
+      const code = this.#source.charCodeAt(this.#position);
+      if (code === 34) {
+        this.#position += 1;
+        return { type: "string", start, end: this.#position, value };
+      }
+      if (code === 92) {
+        this.#position += 1;
+        const escape = this.#source[this.#position];
+        this.#position += 1;
+        const simple = /* @__PURE__ */ new Map([
+          ['"', '"'],
+          ["\\", "\\"],
+          ["/", "/"],
+          ["b", "\b"],
+          ["f", "\f"],
+          ["n", "\n"],
+          ["r", "\r"],
+          ["t", "	"]
+        ]);
+        const decoded = simple.get(escape ?? "");
+        if (decoded !== void 0) {
+          value += decoded;
+          continue;
+        }
+        if (escape !== "u") this.#invalid();
+        const first = this.#parseHexEscape();
+        if (first >= 55296 && first <= 56319) {
+          if (this.#source.slice(this.#position, this.#position + 2) !== "\\u") {
+            this.#invalid();
+          }
+          this.#position += 2;
+          const second = this.#parseHexEscape();
+          if (second < 56320 || second > 57343) this.#invalid();
+          value += String.fromCodePoint(
+            65536 + (first - 55296 << 10) + (second - 56320)
+          );
+        } else {
+          if (first >= 56320 && first <= 57343) this.#invalid();
+          value += String.fromCharCode(first);
+        }
+        continue;
+      }
+      if (code < 32 || code >= 56320 && code <= 57343) this.#invalid();
+      if (code >= 55296 && code <= 56319) {
+        const second = this.#source.charCodeAt(this.#position + 1);
+        if (second < 56320 || second > 57343) this.#invalid();
+        value += this.#source.slice(this.#position, this.#position + 2);
+        this.#position += 2;
+      } else {
+        value += this.#source[this.#position];
+        this.#position += 1;
+      }
+    }
+    return this.#invalid();
+  }
+  #parseObject() {
+    const start = this.#position;
+    this.#position += 1;
+    this.#skipWhitespace();
+    const members = /* @__PURE__ */ new Map();
+    if (this.#source[this.#position] === "}") {
+      this.#position += 1;
+      return { type: "object", start, end: this.#position, members };
+    }
+    while (true) {
+      if (this.#source[this.#position] !== '"') this.#invalid();
+      const name = this.#parseString().value;
+      if (members.has(name)) this.#invalid();
+      this.#skipWhitespace();
+      if (this.#source[this.#position] !== ":") this.#invalid();
+      this.#position += 1;
+      this.#skipWhitespace();
+      members.set(name, this.#parseValue());
+      this.#skipWhitespace();
+      const delimiter = this.#source[this.#position];
+      this.#position += 1;
+      if (delimiter === "}") {
+        return { type: "object", start, end: this.#position, members };
+      }
+      if (delimiter !== ",") this.#invalid();
+      this.#skipWhitespace();
+    }
+  }
+  #parseArray() {
+    const start = this.#position;
+    this.#position += 1;
+    this.#skipWhitespace();
+    const items = [];
+    if (this.#source[this.#position] === "]") {
+      this.#position += 1;
+      return { type: "array", start, end: this.#position, items };
+    }
+    while (true) {
+      items.push(this.#parseValue());
+      this.#skipWhitespace();
+      const delimiter = this.#source[this.#position];
+      this.#position += 1;
+      if (delimiter === "]") {
+        return { type: "array", start, end: this.#position, items };
+      }
+      if (delimiter !== ",") this.#invalid();
+      this.#skipWhitespace();
+    }
+  }
+};
+function invalid() {
+  throw new AdapterError("input_invalid");
+}
 function optionalInput(environment, name) {
   const value = environment[name];
   return value === void 0 || value === "" ? void 0 : value;
 }
 function resolveWorkspacePath(workspace, value) {
-  return import_node_path5.default.resolve(workspace, value);
+  try {
+    return import_node_path5.default.resolve(workspace, value);
+  } catch {
+    return invalid();
+  }
 }
-function parseAttachments(value, workspace) {
-  if (value === void 0 || value === "") {
-    return [];
-  }
-  let body = value;
-  if (body.endsWith("\r\n")) {
-    body = body.slice(0, -2);
-  } else if (body.endsWith("\n")) {
-    body = body.slice(0, -1);
-  }
-  const attachments = [];
-  const lines = body.split("\n");
-  for (const [index, originalLine] of lines.entries()) {
-    let line = originalLine;
-    if (line.endsWith("\r") && index < lines.length - 1) {
-      line = line.slice(0, -1);
+function exactMembers(object, names) {
+  return object.members.size === names.length && names.every((name) => object.members.has(name));
+}
+function requiredString(object, name, allowEmpty) {
+  const node = object.members.get(name);
+  if (node?.type !== "string" || !allowEmpty && node.value === "") invalid();
+  return node.value;
+}
+function parseEntry(name, node, document, workspace) {
+  if (node.type !== "object") invalid();
+  const kind = requiredString(node, "kind", false);
+  if (kind === "text") {
+    if (exactMembers(node, ["kind", "value"])) {
+      return {
+        name,
+        kind,
+        source: { kind: "inline", value: requiredString(node, "value", true) }
+      };
     }
-    const delimiter = line.indexOf("=");
-    if (line === "" || line.includes("\r") || delimiter <= 0 || delimiter === line.length - 1) {
-      throw new AdapterError("input_invalid");
+    if (exactMembers(node, ["kind", "path"])) {
+      return {
+        name,
+        kind,
+        source: {
+          kind: "path",
+          path: resolveWorkspacePath(
+            workspace,
+            requiredString(node, "path", false)
+          )
+        }
+      };
     }
-    attachments.push({
-      mediaType: line.slice(0, delimiter),
-      path: resolveWorkspacePath(workspace, line.slice(delimiter + 1))
+    return invalid();
+  }
+  if (kind === "json") {
+    if (exactMembers(node, ["kind", "value"])) {
+      const value = node.members.get("value");
+      if (value === void 0) invalid();
+      return {
+        name,
+        kind,
+        source: {
+          kind: "inline",
+          value: document.slice(value.start, value.end)
+        }
+      };
+    }
+    if (exactMembers(node, ["kind", "path"])) {
+      return {
+        name,
+        kind,
+        source: {
+          kind: "path",
+          path: resolveWorkspacePath(
+            workspace,
+            requiredString(node, "path", false)
+          )
+        }
+      };
+    }
+    return invalid();
+  }
+  if (kind === "file") {
+    if (!exactMembers(node, ["kind", "mediaType", "path"])) invalid();
+    return {
+      name,
+      kind,
+      mediaType: requiredString(node, "mediaType", false),
+      path: resolveWorkspacePath(
+        workspace,
+        requiredString(node, "path", false)
+      )
+    };
+  }
+  if (kind === "attachments") {
+    if (!exactMembers(node, ["kind", "items"])) invalid();
+    const items = node.members.get("items");
+    if (items?.type !== "array") invalid();
+    return {
+      name,
+      kind,
+      items: items.items.map((item) => {
+        if (item.type !== "object" || !exactMembers(item, ["mediaType", "path"])) {
+          return invalid();
+        }
+        return {
+          mediaType: requiredString(item, "mediaType", false),
+          path: resolveWorkspacePath(
+            workspace,
+            requiredString(item, "path", false)
+          )
+        };
+      })
+    };
+  }
+  return invalid();
+}
+function compareUtf8(left, right) {
+  return Buffer.compare(
+    Buffer.from(left.name, "utf8"),
+    Buffer.from(right.name, "utf8")
+  );
+}
+function parseNamedInputs(document, workspace) {
+  if (document === void 0 || document === "") return [];
+  try {
+    const root = new AcquisitionDocumentParser(document).parse();
+    if (root.type !== "object") invalid();
+    const inputs = [...root.members].map(([name, node]) => {
+      if (!/^[a-z][A-Za-z0-9]{0,63}$/u.test(name)) invalid();
+      return parseEntry(name, node, document, workspace);
     });
+    return inputs.sort(compareUtf8);
+  } catch (error) {
+    if (error instanceof AdapterError) throw error;
+    return invalid();
   }
-  return attachments;
 }
 async function readActionInputs(environment) {
   const workspaceValue = environment.GITHUB_WORKSPACE;
@@ -4075,12 +4394,15 @@ async function readActionInputs(environment) {
   if (!workspaceStatus?.isDirectory()) {
     throw new AdapterError("input_invalid");
   }
-  const workflowValue = optionalInput(environment, "INPUT_WORKFLOW");
-  const prompt = optionalInput(environment, "INPUT_PROMPT");
-  const promptFileValue = optionalInput(environment, "INPUT_PROMPT-FILE");
-  if (!workflowValue || prompt !== void 0 && promptFileValue !== void 0) {
-    throw new AdapterError("input_invalid");
+  for (const removed of [
+    "INPUT_PROMPT",
+    "INPUT_PROMPT-FILE",
+    "INPUT_ATTACHMENTS"
+  ]) {
+    if (Object.prototype.hasOwnProperty.call(environment, removed)) invalid();
   }
+  const workflowValue = optionalInput(environment, "INPUT_WORKFLOW");
+  if (!workflowValue) throw new AdapterError("input_invalid");
   const maximumParallel = optionalInput(environment, "INPUT_MAX-PARALLEL") ?? "1";
   if (!/^[0-9]+$/u.test(maximumParallel)) {
     throw new AdapterError("input_invalid");
@@ -4091,16 +4413,13 @@ async function readActionInputs(environment) {
   }
   const sourceRootValue = optionalInput(environment, "INPUT_SOURCE-ROOT");
   const executionRootValue = optionalInput(environment, "INPUT_EXECUTION-ROOT");
-  const attachmentsValue = optionalInput(environment, "INPUT_ATTACHMENTS");
   const selectedExport = optionalInput(environment, "INPUT_EXPORT");
   return {
     workspace,
     workflow: resolveWorkspacePath(workspace, workflowValue),
     sourceRoot: sourceRootValue === void 0 ? workspace : resolveWorkspacePath(workspace, sourceRootValue),
     executionRoot: executionRootValue === void 0 ? workspace : resolveWorkspacePath(workspace, executionRootValue),
-    ...prompt === void 0 ? {} : { prompt },
-    ...promptFileValue === void 0 ? {} : { promptFile: resolveWorkspacePath(workspace, promptFileValue) },
-    attachments: parseAttachments(attachmentsValue, workspace),
+    namedInputs: parseNamedInputs(environment.INPUT_INPUTS, workspace),
     maximumParallel,
     ...selectedExport === void 0 ? {} : { selectedExport }
   };
@@ -4669,7 +4988,14 @@ var DEFAULT_ACTION_DEPENDENCIES = {
   bootstrap: bootstrapCli,
   readInputs: readActionInputs,
   allocate: allocateExecution,
-  execute: runWorkflow,
+  execute: (executable, inputs, allocation, environment, cancellation) => runWorkflow(
+    executable,
+    inputs,
+    allocation,
+    environment,
+    DEFAULT_EXECUTION_DEPENDENCIES,
+    cancellation
+  ),
   readTerminal: readTerminalEnvelope,
   recover: recoverDurableRun,
   project: (executable, identity, selectedExport, environment) => validateAndProject(executable, identity, selectedExport, environment),
@@ -4693,22 +5019,46 @@ async function executeAction(environment, dependencies = DEFAULT_ACTION_DEPENDEN
   const fail = (error) => {
     failure ??= asAdapterError(error);
   };
+  const cancellation = new AbortController();
+  let workflowActive = false;
+  let cleanup;
+  const cleanupOnce = () => {
+    const allocated = allocation;
+    if (!allocated) return Promise.resolve();
+    cleanup ??= Promise.resolve().then(() => dependencies.cleanup(allocated)).catch(fail);
+    return cleanup;
+  };
+  const cancel = (signal) => () => {
+    if (!cancellation.signal.aborted) cancellation.abort(signal);
+    fail(new AdapterError("workflow_failed"));
+    if (!workflowActive) void cleanupOnce();
+  };
+  const onInterrupt = cancel("SIGINT");
+  const onTerminate = cancel("SIGTERM");
+  process.on("SIGINT", onInterrupt);
+  process.on("SIGTERM", onTerminate);
   try {
     bootstrap = await dependencies.bootstrap(environment);
     inputs = await dependencies.readInputs(environment);
     allocation = await dependencies.allocate(
       environment.RUNNER_TEMP,
-      inputs.prompt
+      inputs.namedInputs
     );
+    if (cancellation.signal.aborted) throw new AdapterError("workflow_failed");
+    workflowActive = true;
     try {
       processResult = await dependencies.execute(
         bootstrap.executable,
         inputs,
         allocation,
-        bootstrap.environment
+        bootstrap.environment,
+        cancellation.signal
       );
     } catch (error) {
       fail(error);
+    } finally {
+      workflowActive = false;
+      if (cancellation.signal.aborted) await cleanupOnce();
     }
     if (processResult) {
       if (processResult.terminalOverflow) {
@@ -4779,8 +5129,11 @@ async function executeAction(environment, dependencies = DEFAULT_ACTION_DEPENDEN
       ) ?? "";
     }
   } finally {
-    if (allocation) {
-      await dependencies.cleanup(allocation).catch(fail);
+    try {
+      await cleanupOnce();
+    } finally {
+      process.off("SIGINT", onInterrupt);
+      process.off("SIGTERM", onTerminate);
     }
   }
   await dependencies.writeOutputs(environment.GITHUB_OUTPUT, outputs).catch(fail);

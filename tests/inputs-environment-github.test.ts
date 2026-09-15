@@ -12,7 +12,7 @@ import {
   WorkflowCommandGuard,
   writeOutputs,
 } from "../src/github.ts";
-import { parseAttachments, readActionInputs } from "../src/inputs.ts";
+import { parseNamedInputs, readActionInputs } from "../src/inputs.ts";
 
 async function withWorkspace(
   callback: (workspace: string) => Promise<void>,
@@ -25,13 +25,35 @@ async function withWorkspace(
   }
 }
 
-test("inputs preserve bytes, defaults, path authority, and exact parallel digits", async () => {
+function rejectsInput(
+  document: string,
+  workspace = path.resolve("/workspace"),
+): void {
+  assert.throws(
+    () => parseNamedInputs(document, workspace),
+    (error: unknown) =>
+      error instanceof AdapterError && error.code === "input_invalid",
+  );
+}
+
+test("named inputs preserve closed forms, lexical JSON, path identity, and byte order", async () => {
   await withWorkspace(async (workspace) => {
     const environment: NodeJS.ProcessEnv = {
       GITHUB_WORKSPACE: workspace,
       INPUT_WORKFLOW: "flows/run.yaml",
-      INPUT_PROMPT: "  exact prompt\r\n",
-      INPUT_ATTACHMENTS: "image/png=media/a.png\r\nimage/png=media/a.png\r\n",
+      INPUT_INPUTS: `{
+        "textPath":{"kind":"text","path":"-"},
+        "ordered":{"kind":"attachments","items":[
+          {"mediaType":" image/png ","path":"media/a=b.png"},
+          {"mediaType":"image/png","path":"media/a=b.png"}
+        ]},
+        "jsonPath":{"kind":"json","path":"private.json"},
+        "fileValue":{"kind":"file","mediaType":"application/octet-stream","path":"data.bin"},
+        "emptyItems":{"kind":"attachments","items":[]},
+        "textValue":{"kind":"text","value":"  exact prompt\\r\\n"},
+        "aZ":{"kind":"json","value":[1.2300e+04, {"escaped":"\\u0061", "empty":null}]},
+        "aa":{"kind":"text","value":"last"}
+      }`,
       "INPUT_MAX-PARALLEL": "0256",
       INPUT_EXPORT: "Result",
     };
@@ -40,73 +62,142 @@ test("inputs preserve bytes, defaults, path authority, and exact parallel digits
     assert.equal(inputs.workflow, path.join(workspace, "flows/run.yaml"));
     assert.equal(inputs.sourceRoot, workspace);
     assert.equal(inputs.executionRoot, workspace);
-    assert.equal(inputs.prompt, "  exact prompt\r\n");
     assert.equal(inputs.maximumParallel, "0256");
     assert.equal(inputs.selectedExport, "Result");
-    assert.deepEqual(inputs.attachments, [
-      { mediaType: "image/png", path: path.join(workspace, "media/a.png") },
-      { mediaType: "image/png", path: path.join(workspace, "media/a.png") },
+    assert.deepEqual(inputs.namedInputs, [
+      {
+        name: "aZ",
+        kind: "json",
+        source: {
+          kind: "inline",
+          value: '[1.2300e+04, {"escaped":"\\u0061", "empty":null}]',
+        },
+      },
+      {
+        name: "aa",
+        kind: "text",
+        source: { kind: "inline", value: "last" },
+      },
+      {
+        name: "emptyItems",
+        kind: "attachments",
+        items: [],
+      },
+      {
+        name: "fileValue",
+        kind: "file",
+        mediaType: "application/octet-stream",
+        path: path.join(workspace, "data.bin"),
+      },
+      {
+        name: "jsonPath",
+        kind: "json",
+        source: { kind: "path", path: path.join(workspace, "private.json") },
+      },
+      {
+        name: "ordered",
+        kind: "attachments",
+        items: [
+          {
+            mediaType: " image/png ",
+            path: path.join(workspace, "media/a=b.png"),
+          },
+          {
+            mediaType: "image/png",
+            path: path.join(workspace, "media/a=b.png"),
+          },
+        ],
+      },
+      {
+        name: "textPath",
+        kind: "text",
+        source: { kind: "path", path: path.join(workspace, "-") },
+      },
+      {
+        name: "textValue",
+        kind: "text",
+        source: { kind: "inline", value: "  exact prompt\r\n" },
+      },
     ]);
   });
 });
 
-test("prompt conflict is rejected without opening the prompt file", async () => {
+test("absent, empty, and JSON empty objects select only the empty map", () => {
+  const workspace = path.resolve("/workspace");
+  for (const document of [undefined, "", "{}", " { \r\n } "]) {
+    assert.deepEqual(parseNamedInputs(document, workspace), []);
+  }
+  rejectsInput("   ", workspace);
+});
+
+test("the acquisition grammar rejects malformed, duplicate, unknown, and wrong-kind forms", () => {
+  const malformed = [
+    "null",
+    "[]",
+    "true",
+    "{",
+    "{} false",
+    "\ufeff{}",
+    '{"Name":{"kind":"text","value":"x"}}',
+    '{"name":{"kind":"text","value":"x"},"name":{"kind":"text","value":"y"}}',
+    '{"name":{"kind":"json","value":{"a":1,"\\u0061":2}}}',
+    '{"name":{"kind":"text","kind":"text","value":"x"}}',
+    '{"name":{"kind":"unknown","value":"x"}}',
+    '{"name":{"kind":"text","value":null}}',
+    '{"name":{"kind":"text","value":"x","path":"x"}}',
+    '{"name":{"kind":"text","path":""}}',
+    '{"name":{"kind":"json"}}',
+    '{"name":{"kind":"json","path":7}}',
+    '{"name":{"kind":"file","mediaType":"","path":"x"}}',
+    '{"name":{"kind":"file","mediaType":"text/plain","path":"x","extra":true}}',
+    '{"name":{"kind":"attachments","items":null}}',
+    '{"name":{"kind":"attachments","items":[{"mediaType":"text/plain","path":""}]}}',
+    '{"name":{"kind":"attachments","items":[{"mediaType":"text/plain","path":"x","extra":0}]}}',
+    '{"name":{"kind":"json","value":"\\ud800"}}',
+    `{"name":{"kind":"text","value":"${String.fromCharCode(0xd800)}"}}`,
+  ];
+  malformed.forEach((document) => rejectsInput(document));
+});
+
+test("removed fixed Action inputs reject even empty values", async () => {
   await withWorkspace(async (workspace) => {
-    const promptFile = path.join(workspace, "must-not-be-read");
-    await writeFile(promptFile, "private bytes", { mode: 0o000 });
-    await assert.rejects(
-      readActionInputs({
-        GITHUB_WORKSPACE: workspace,
-        INPUT_WORKFLOW: "workflow.yaml",
-        INPUT_PROMPT: "inline",
-        "INPUT_PROMPT-FILE": "must-not-be-read",
-      }),
-      (error: unknown) =>
-        error instanceof AdapterError && error.code === "input_invalid",
-    );
+    for (const name of [
+      "INPUT_PROMPT",
+      "INPUT_PROMPT-FILE",
+      "INPUT_ATTACHMENTS",
+    ]) {
+      await assert.rejects(
+        readActionInputs({
+          GITHUB_WORKSPACE: workspace,
+          INPUT_WORKFLOW: "workflow.yaml",
+          [name]: "",
+        }),
+        (error: unknown) =>
+          error instanceof AdapterError && error.code === "input_invalid",
+      );
+    }
   });
 });
 
-test("prompt-file is passed as a path without Action reads", async () => {
+test("path acquisitions are passed without Action content reads", async () => {
   await withWorkspace(async (workspace) => {
-    const promptFile = path.join(workspace, "-");
+    const source = path.join(workspace, "must-not-be-read");
+    await writeFile(source, "private bytes", { mode: 0o000 });
     const inputs = await readActionInputs({
       GITHUB_WORKSPACE: workspace,
       INPUT_WORKFLOW: "workflow.yaml",
-      "INPUT_PROMPT-FILE": "-",
+      INPUT_INPUTS: JSON.stringify({
+        privateValue: { kind: "json", path: "must-not-be-read" },
+      }),
     });
-    assert.equal(inputs.promptFile, promptFile);
+    assert.deepEqual(inputs.namedInputs, [
+      {
+        name: "privateValue",
+        kind: "json",
+        source: { kind: "path", path: source },
+      },
+    ]);
   });
-});
-
-test("attachment parser preserves first equals, whitespace, order, and duplicates", () => {
-  const workspace = path.resolve("/workspace");
-  assert.deepEqual(
-    parseAttachments(" text/plain = a=b \ntext/plain=x\n", workspace),
-    [
-      { mediaType: " text/plain ", path: path.join(workspace, " a=b ") },
-      { mediaType: "text/plain", path: path.join(workspace, "x") },
-    ],
-  );
-  for (const malformed of [
-    "",
-    "\n",
-    "a",
-    "=b",
-    "a=",
-    "a=b\n\n",
-    "a=b\rc=d",
-    "a=b\r",
-  ]) {
-    if (malformed === "") {
-      assert.deepEqual(parseAttachments(malformed, workspace), []);
-    } else {
-      assert.throws(
-        () => parseAttachments(malformed, workspace),
-        (error: unknown) => error instanceof AdapterError,
-      );
-    }
-  }
 });
 
 test("max-parallel accepts only exact digit strings in the CLI range", async () => {

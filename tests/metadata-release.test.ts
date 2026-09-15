@@ -18,9 +18,7 @@ const inputNames = [
   "workflow",
   "source-root",
   "execution-root",
-  "prompt",
-  "prompt-file",
-  "attachments",
+  "inputs",
   "max-parallel",
   "export",
 ];
@@ -66,7 +64,11 @@ test("public checks define source and all supported native behavior jobs", async
         name: string;
         "runs-on": string;
         strategy: { matrix: { runner: string[] } };
-        steps: { uses?: string; "continue-on-error"?: boolean }[];
+        steps: {
+          uses?: string;
+          with?: Record<string, unknown>;
+          "continue-on-error"?: boolean;
+        }[];
       };
     };
   };
@@ -83,13 +85,31 @@ test("public checks define source and all supported native behavior jobs", async
     "ubuntu-24.04-arm",
     "macos-15",
   ]);
+  const actionSteps = workflow.jobs.behavior.steps.filter(
+    ({ uses }) => uses === "./",
+  );
   assert.deepEqual(
-    workflow.jobs.behavior.steps
-      .filter(({ uses }) => uses === "./")
-      .map(
-        ({ "continue-on-error": continueOnError }) => continueOnError ?? false,
-      ),
+    actionSteps.map(
+      ({ "continue-on-error": continueOnError }) => continueOnError ?? false,
+    ),
     [false, true],
+  );
+  const namedInputs = JSON.parse(
+    String(actionSteps[0]?.with?.inputs),
+  ) as Record<string, { kind: string }>;
+  assert.deepEqual(
+    Object.fromEntries(
+      Object.entries(namedInputs).map(([name, input]) => [name, input.kind]),
+    ),
+    {
+      pathText: "text",
+      emptyText: "text",
+      pathJson: "json",
+      inlineJson: "json",
+      emptyFile: "file",
+      orderedItems: "attachments",
+      emptyItems: "attachments",
+    },
   );
 });
 
@@ -132,7 +152,7 @@ test("traceability accounts for every V1 invariant and requirement", async () =>
   }
 });
 
-test("release evidence is the closed observed v0.32.0 release", () => {
+test("release evidence is the closed observed v0.36.0 release", () => {
   assert.deepEqual(PINNED_RELEASE, evidence);
   assert.deepEqual(
     {
@@ -150,21 +170,21 @@ test("release evidence is the closed observed v0.32.0 release", () => {
     {
       repository: "scherzo-systems/scherzo-cloud-cli",
       releaseUrl:
-        "https://github.com/scherzo-systems/scherzo-cloud-cli/releases/tag/v0.32.0",
-      tag: "v0.32.0",
-      releaseId: 386748412,
-      releaseCommit: "70cda5707c419de3912769f4adeba6805af7c2c6",
-      sourceRevision: "8850664b080784c826a410e770092e452a6bd9b7",
-      requiredSourceAncestor: "d3abe478b006861330b8998cb8ccfefe28cf7958",
-      version: "0.32.0",
-      buildIdentity: "8850664b080784c826a410e770092e452a6bd9b7",
+        "https://github.com/scherzo-systems/scherzo-cloud-cli/releases/tag/v0.36.0",
+      tag: "v0.36.0",
+      releaseId: 388669851,
+      releaseCommit: "f665784fccddee8be91d0d12f43b165089dda438",
+      sourceRevision: "7da44756c2f611f39c47ee28a697c01f8afe7a6e",
+      requiredSourceAncestor: "7215869ca26439d305c097af1dca50ebb8066419",
+      version: "0.36.0",
+      buildIdentity: "7da44756c2f611f39c47ee28a697c01f8afe7a6e",
       checksumAsset: {
-        id: 556305548,
+        id: 564106171,
         name: "SHA256SUMS",
         size: 354,
         sha256:
-          "5189a1e1624074d3be345770d9717ab7d605dea2446b49fbd76b7a2cbbef31c5",
-        url: "https://github.com/scherzo-systems/scherzo-cloud-cli/releases/download/v0.32.0/SHA256SUMS",
+          "b1cd0eb17d23e8a51861f208b714b6fddae21ac6fd061147b789a1594b022fd2",
+        url: "https://github.com/scherzo-systems/scherzo-cloud-cli/releases/download/v0.36.0/SHA256SUMS",
       },
     },
   );
@@ -177,22 +197,22 @@ test("release evidence is the closed observed v0.32.0 release", () => {
     ),
     {
       "x86_64-unknown-linux-gnu": [
-        556305547,
-        "scherzo-cloud-0.32.0-x86_64-unknown-linux-gnu.tar.gz",
-        11399162,
-        "1b2d873aa50487cb9e283a56b9ed62e2b02e5082ab313b05983452df63001e12",
+        564106172,
+        "scherzo-cloud-0.36.0-x86_64-unknown-linux-gnu.tar.gz",
+        11851127,
+        "66cac4647491087297b81a346c9469558d68f22393a2a033ab0d87981dbba96b",
       ],
       "aarch64-unknown-linux-gnu": [
-        556305545,
-        "scherzo-cloud-0.32.0-aarch64-unknown-linux-gnu.tar.gz",
-        11680652,
-        "081ce9df233de3531768d8f2b29babf5ad0af09fde97d72e0e0b2e86c0c2f0d4",
+        564106176,
+        "scherzo-cloud-0.36.0-aarch64-unknown-linux-gnu.tar.gz",
+        12192345,
+        "9af8d51c7551063c4ee3c3c7f326905477c00cd7d7598b15e1479c260dff3a14",
       ],
       "aarch64-apple-darwin": [
-        556305531,
-        "scherzo-cloud-0.32.0-aarch64-apple-darwin.tar.gz",
-        10468837,
-        "e11aad4bc5aabe1ba5c47dd6de55097eb6f4bad68a679be8ad1a77b53f322455",
+        564106175,
+        "scherzo-cloud-0.36.0-aarch64-apple-darwin.tar.gz",
+        10923729,
+        "0ff4a7e0382a4e31d7f935d0ebae511e2ac799b9023a0ee5d1574c15406a8771",
       ],
     },
   );

@@ -4,6 +4,7 @@ import {
   allocateExecution,
   cleanupExecution,
   runWorkflow,
+  DEFAULT_EXECUTION_DEPENDENCIES,
   type ExecutionAllocation,
   type WorkflowProcessResult,
 } from "./execution.ts";
@@ -36,13 +37,14 @@ export interface ActionDependencies {
   ) => Promise<ActionInputs>;
   readonly allocate: (
     runnerTemp: string | undefined,
-    prompt: string | undefined,
+    namedInputs: ActionInputs["namedInputs"],
   ) => Promise<ExecutionAllocation>;
   readonly execute: (
     executable: string,
     inputs: ActionInputs,
     allocation: ExecutionAllocation,
     environment: NodeJS.ProcessEnv,
+    cancellation: AbortSignal,
   ) => Promise<WorkflowProcessResult>;
   readonly readTerminal: (file: string) => Promise<TerminalEnvelope>;
   readonly recover: (
@@ -67,7 +69,15 @@ export const DEFAULT_ACTION_DEPENDENCIES: ActionDependencies = {
   bootstrap: bootstrapCli,
   readInputs: readActionInputs,
   allocate: allocateExecution,
-  execute: runWorkflow,
+  execute: (executable, inputs, allocation, environment, cancellation) =>
+    runWorkflow(
+      executable,
+      inputs,
+      allocation,
+      environment,
+      DEFAULT_EXECUTION_DEPENDENCIES,
+      cancellation,
+    ),
   readTerminal: readTerminalEnvelope,
   recover: recoverDurableRun,
   project: (executable, identity, selectedExport, environment) =>
@@ -106,6 +116,28 @@ export async function executeAction(
   const fail = (error: unknown): void => {
     failure ??= asAdapterError(error);
   };
+  const cancellation = new AbortController();
+  let workflowActive = false;
+  let cleanup: Promise<void> | undefined;
+  const cleanupOnce = (): Promise<void> => {
+    const allocated = allocation;
+    if (!allocated) return Promise.resolve();
+    cleanup ??= Promise.resolve()
+      .then(() => dependencies.cleanup(allocated))
+      .catch(fail);
+    return cleanup;
+  };
+  const cancel = (signal: "SIGINT" | "SIGTERM") => () => {
+    if (!cancellation.signal.aborted) cancellation.abort(signal);
+    fail(new AdapterError("workflow_failed"));
+    // Keep files available to a live workflow until it closes. Outside that
+    // interval, cancellation must clean even if result processing is blocked.
+    if (!workflowActive) void cleanupOnce();
+  };
+  const onInterrupt = cancel("SIGINT");
+  const onTerminate = cancel("SIGTERM");
+  process.on("SIGINT", onInterrupt);
+  process.on("SIGTERM", onTerminate);
 
   try {
     // Bootstrap deliberately precedes every INPUT_ read.
@@ -113,17 +145,23 @@ export async function executeAction(
     inputs = await dependencies.readInputs(environment);
     allocation = await dependencies.allocate(
       environment.RUNNER_TEMP,
-      inputs.prompt,
+      inputs.namedInputs,
     );
+    if (cancellation.signal.aborted) throw new AdapterError("workflow_failed");
+    workflowActive = true;
     try {
       processResult = await dependencies.execute(
         bootstrap.executable,
         inputs,
         allocation,
         bootstrap.environment,
+        cancellation.signal,
       );
     } catch (error) {
       fail(error);
+    } finally {
+      workflowActive = false;
+      if (cancellation.signal.aborted) await cleanupOnce();
     }
 
     if (processResult) {
@@ -209,8 +247,11 @@ export async function executeAction(
         )) ?? "";
     }
   } finally {
-    if (allocation) {
-      await dependencies.cleanup(allocation).catch(fail);
+    try {
+      await cleanupOnce();
+    } finally {
+      process.off("SIGINT", onInterrupt);
+      process.off("SIGTERM", onTerminate);
     }
   }
 
